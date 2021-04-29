@@ -3,7 +3,6 @@
 Grupo 1, conformado por Ulises Cabaleiro, Jasmine Michelle Cucagna, Dolores Lopez Joffre, Marco Piatti y Esteban Viera.
 
 
-
 **Modo de uso**
 
 Se crea un archivo [*entrada.txt*](entrada.txt) listando cadenas de cualquier tipo, separadas por comas.
