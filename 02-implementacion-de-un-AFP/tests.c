@@ -16,7 +16,7 @@ typedef struct casoDeTest{
 
 int main(void){
 
-    const cantidadDeTests = 4;
+    const cantidadDeTests = 10;
 
     casoDeTest tests[cantidadDeTests] =         {{"(10+3)*55+4",                                1}
                                             ,   {"()((",                                        0}
@@ -26,8 +26,8 @@ int main(void){
                                             ,   {"4/4/4/4/4-4+3-4",                             1}
                                             ,   {"/",                                           0}
                                             ,   {"(1 + 2 * (3 - (8 / 2)) - 1 ) + ((12))",       1}
-                                            ,   {"3 4",                                         0}      // REVISAR: Si el programa omite los espacios primero esto es una expresion valida,  
-                                                                                                        // pero en realidad C no la considera valida.
+                                            ,   {"3 4",                                         0}      // REVISAR: Si el programa omite los espacios primero esto es una expresion   
+                                                                                                        // valida, pero en realidad C no la considera valida.
                                             ,   {"10+1+5/6",                                    1}};    
 
 
@@ -46,20 +46,19 @@ int main(void){
 
 void testearSintacticamenteCorrecta(char expresion[], int retornoEsperado){
     if (sintacticamenteCorrecta(expresion) == retornoEsperado){
-        if (retornoEsperado == 1){
-            printf("\nCorrecto: %s es sintacticamente correcta.", expresion);
+        if (retornoEsperado == 0){
+            printf("\nCorrecto: %s no es sintacticamente correcta.", expresion);
         } 
         else{
-            printf("\nCorrecto: %s no es sintacticamente correcta.", expresion);
+            printf("\nCorrecto: %s es sintacticamente correcta.", expresion);
         }
     } 
     else{
-        if (retornoEsperado == 1){
-            printf("\n ---- FALLO: %s ES sintacticamente correcta.", expresion);
-        }
-        else{
+        if (retornoEsperado == 0){
             printf("\n ---- FALLO: %s NO ES sintacticamente correcta.", expresion);
         }
+        else{
+            printf("\n ---- FALLO: %s ES sintacticamente correcta.", expresion);
+        }
     }
-
 }
