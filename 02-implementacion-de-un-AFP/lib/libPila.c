@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "libTP2.h"
 
 // Agrega un simbolo de pila a la Pila
