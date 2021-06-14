@@ -14,7 +14,7 @@ const movimiento TablaDeMovimientos [MAX_S][MAX_Q][MAX_T] =
     {
         { RECHAZO       , {Q1, &nada}   , RECHAZO       , {Q0, &pushR}  , RECHAZO           , RECHAZO },
         { {Q1, &nada}   , {Q1, &nada}   , {Q0, &nada}   , RECHAZO       , {Q2, &descartar}  , RECHAZO },
-        { RECHAZO       , RECHAZO       , {Q1, &nada}   , RECHAZO       , {Q2, &descartar}  , RECHAZO },
+        { RECHAZO       , RECHAZO       , {Q0, &nada}   , RECHAZO       , {Q2, &descartar}  , RECHAZO },
         { RECHAZO       , RECHAZO       , RECHAZO       , RECHAZO       , RECHAZO           , RECHAZO }
     }
 };
