@@ -1,7 +1,15 @@
 %option noyywrap
+%option yylineno
+%option warn
+
 %{
 
-}%
+#include <stdio.h>
+#include "freqtable.h"
+#include "list.h"
+#include "queue.h"
+
+%}
 
 alpha                       [:alpha:]
 minuscula                   [:lower:]
@@ -79,3 +87,7 @@ define                      #define[ \t]+
 
 %%
 
+int main() {
+    yylex();
+    return 0;
+}
