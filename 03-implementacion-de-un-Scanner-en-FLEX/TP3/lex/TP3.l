@@ -6,8 +6,8 @@
 
 #include <stdio.h>
 #include "freqtable.h"
-#include "list.h"
-#include "queue.h"
+#include "lexemelist.h"
+#include "writers.h"
 
 %}
 

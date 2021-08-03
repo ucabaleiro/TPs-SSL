@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include "writers.h"
 #include "list.h"
 #include "stringso.h"
@@ -48,17 +49,17 @@ void as_string_literal(void* element, FILE* file){
 
 void as_oct_hex(void* element, FILE* file){
     char* r_element = (char*) element;
-    char* printed_entry = string_from_format("lexema: %s, valor decimal: %i\n", r_element, atoi(r_element));
+    char* printed_entry = string_from_format("lexema: %s, valor decimal: %lld\n", r_element, atol(r_element));
     txt_write_in_file(file, printed_entry);
     free(printed_entry);
 }
 
 void as_real(void* element, FILE* file){
     char* r_element = (char*) element;
-    char** split = string_split(r_element, ".");
-    char* printed_entry = string_from_format("lexema: %s, mantisa: %s, exponente: %s\n", r_element, split[0], split[1]);
+    double mantissa, integer, real = atof(r_element);
+    mantissa = modf(real, &integer);
+    char* printed_entry = string_from_format("lexema: %s, parte entera: %g, mantisa: %g\n", r_element, integer, mantissa);
     txt_write_in_file(file, printed_entry);
-    free_nullterminated_pointer_array(split);
     free(printed_entry);
      
 }
@@ -79,15 +80,7 @@ void as_errortable_entry(void* element, FILE* file){
 }
 
 void lexeme_list_write_sum(t_lexeme_list* self, FILE* file){
-    char* printed_entry = string_from_format("sumatoria total: %i\n", lexeme_list_sum_as_int(self));
+    char* printed_entry = string_from_format("sumatoria total: %lld\n", lexeme_list_sum_as_int(self));
     txt_write_in_file(file, printed_entry);
     free(printed_entry);
-}
-
-void free_nullterminated_pointer_array(char** data){
-    for (size_t i = 0; data[i] != NULL; i++)
-    {
-        free(data[i]);
-    }
-    free(data);   
 }
