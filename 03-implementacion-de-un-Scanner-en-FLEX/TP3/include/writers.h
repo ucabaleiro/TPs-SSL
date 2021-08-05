@@ -15,6 +15,5 @@
     void as_real(void* element, FILE* file);
     void as_freqtable_entry(void* element, FILE* file);
     void as_errortable_entry(void* element, FILE* file);
-    void lexeme_list_write_sum(t_lexeme_list* self, FILE* file);
 
 #endif // !W_H_
