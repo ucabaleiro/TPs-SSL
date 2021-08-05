@@ -26,4 +26,4 @@ $(ODIR)/%.o: $(SRCDIR)/%.c $(DEPS) $(COMMONS_DEPS)
 .PHONY: clean
 
 clean:
-	rm -f $(ODIR)/*.o $(SRCDIR)/TP3.c $(PROCESS_NAME)
+	rm -f $(ODIR)/*.o $(SRCDIR)/TP3.c $(PROCESS_NAME) yyout.txt

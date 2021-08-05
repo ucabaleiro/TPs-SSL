@@ -2,5 +2,5 @@
 FILE=TP3
 make $FILE
 if test -f "./$FILE"; then
-    ./$FILE
+    ./$FILE $1
 fi
