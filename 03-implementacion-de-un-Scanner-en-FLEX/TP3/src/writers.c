@@ -12,7 +12,7 @@ void list_write_to(t_list* self, FILE* file, char* title, void(*write_as)(void*,
     void _write_as(void* element){
         write_as(element, file);
     }
-    char* line = string_repeat('-', 20);
+    char* line = string_repeat('-', string_length(title));
     char* printed_header = string_from_format("%s\n%s\n", title, line);
     txt_write_in_file(file, printed_header);
     free(printed_header);
@@ -49,7 +49,7 @@ void as_string_literal(void* element, FILE* file){
 
 void as_oct_hex(void* element, FILE* file){
     char* r_element = (char*) element;
-    char* printed_entry = string_from_format("lexema: %s, valor decimal: %lld\n", r_element, atol(r_element));
+    char* printed_entry = string_from_format("lexema: %s, valor decimal: %ld\n", r_element, atol(r_element));
     txt_write_in_file(file, printed_entry);
     free(printed_entry);
 }
@@ -80,7 +80,7 @@ void as_errortable_entry(void* element, FILE* file){
 }
 
 void lexeme_list_write_sum(t_lexeme_list* self, FILE* file){
-    char* printed_entry = string_from_format("sumatoria total: %lld\n", lexeme_list_sum_as_int(self));
+    char* printed_entry = string_from_format("sumatoria total: %lld\n\n", lexeme_list_sum_as_int(self));
     txt_write_in_file(file, printed_entry);
     free(printed_entry);
 }
