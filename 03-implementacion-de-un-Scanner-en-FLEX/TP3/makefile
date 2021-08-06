@@ -20,8 +20,11 @@ $(PROCESS_NAME): $(OBJ) $(ODIR)/TP3.o
 $(SRCDIR)/TP3.c: $(LEXDIR)/TP3.l
 	flex -o$@ $^
 
-$(ODIR)/%.o: $(SRCDIR)/%.c $(DEPS) $(COMMONS_DEPS)
+$(ODIR)/%.o: $(SRCDIR)/%.c $(DEPS) $(COMMONS_DEPS) | $(ODIR)
 	$(CC) -c -o $@ $< $(CFLAGS)
+
+$(ODIR):
+	mkdir -p $@
 
 .PHONY: clean
 
