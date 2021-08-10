@@ -34,12 +34,12 @@ void instanciar_listas() {
 }
 
 void mostrar_listas_en(FILE* output) {
-    lexeme_list_write (listas[IDENTIFICADOR] , output, "Identificadores"         , as_frequency_count);
-    lexeme_list_write (listas[LITERAL_CADENA], output, "Literales Cadena"        , as_string_literal );
-    lexeme_list_write (listas[KEYWORD]       , output, "Palabras Reservadas"     , as_keyword        );
-    lexeme_list_write (listas[CTE_OCT]       , output, "Constantes Octales"      , as_oct_hex        );
-    lexeme_list_write (listas[CTE_HEX]       , output, "Constantes Hexadecimales", as_is             );
-    lexeme_list_write (listas[CTE_DEC]       , output, "Constantes Decimales"    , as_oct_hex        );
+    lexeme_list_write (listas[IDENTIFICADOR] , output, "Identificadores"                      , as_frequency_count);
+    lexeme_list_write (listas[LITERAL_CADENA], output, "Literales Cadena"                     , as_string_literal );
+    lexeme_list_write (listas[KEYWORD]       , output, "Palabras Reservadas"                  , as_keyword        );
+    lexeme_list_write (listas[CTE_OCT]       , output, "Constantes Octales"                   , as_oct_hex        );
+    lexeme_list_write (listas[CTE_HEX]       , output, "Constantes Hexadecimales"             , as_is             );
+    lexeme_list_write (listas[CTE_DEC]       , output, "Constantes Decimales"                 , as_oct_hex        );
     
     lexeme_list_write_sum (listas[CTE_DEC], output);
 
@@ -76,9 +76,8 @@ nondigit                    {alpha}|_
 digit		                [0-9]
 nonzero                     [1-9]
 hexdigit                    [0-9a-fA-F]
+prefijo_hex                 0[xX]
 octdigit                    [0-7]
-
-token                       {palabra_reservada}|{identificador}|{constante}|{literal_cadena}|{puntuador}
 
 keyword_otro                extern|inline|sizeof
 keyword_control             break|case|continue|default|do|else|for|goto|if|return|switch|while
@@ -89,27 +88,22 @@ identificador_nondigit      {nondigit}|{caracter_universal}
 caracter_universal          \\[uU]{hex_quad}{1,2}
 hex_quad                    {hexdigit}{4}
 
-constante                   {const_entero}|{const_float}|{const}
+
 
 const_entero                ({entero_dec}|{entero_hex}|{entero_oct}){sufijo_entero}?
-entero_dec		            {nonzero}{digit}*
-entero_hex                  {prefijo_hex}{hexdigit}+
-prefijo_hex                 0[xX]
-entero_oct                  0{octdigit}*
-sufijo_entero               {sufijo_unsigned}({sufijo_long}|{sufijo_longLong})?|({sufijo_long}|{sufijo_longLong}){sufijo_unsigned}?
-sufijo_unsigned             [uU]
-sufijo_long                 [lL]
-sufijo_longLong             ll|LL
+entero_dec		            {nonzero}{digit}*{sufijo_entero}?
+entero_hex                  {prefijo_hex}{hexdigit}+{sufijo_entero}?
+entero_oct                  0{octdigit}*{sufijo_entero}?
+sufijo_entero               [uU]([lL]|ll|LL)?|([lL]|ll|LL)[uU]?
 
 const_float                 {float_dec}|{float_hex}
-float_dec                   ({significando_dec}{exponente_dec}?|{digit}+{exponente_dec}){sufijo_float}?
+float_dec                   ({significando_dec}{exponente_dec}?|{digit}+{exponente_dec})[fFlL]?
+float_hex                   {prefijo_hex}({significando_hex}|{hexdigit}+){exponente_hex}[fFlL]?
 significando_dec            {digit}*"."{digit}+|{digit}+"."
-exponente_dec               [eE]{exponente}
-float_hex                   {prefijo_hex}({significando_hex}|{hexdigit}+){exponente_hex}{sufijo_float}?
 significando_hex            {hexdigit}*"."{hexdigit}+|{hexdigit}+"."
+exponente_dec               [eE]{exponente}
 exponente_hex               [pP]{exponente}
 exponente                   [\+\-]?{digit}+
-sufijo_float                [fFlL]
 
 const_char                  L?[']{c_char}+[']
 c_char                      [^\'\\\n]|{escape}
@@ -124,42 +118,40 @@ escape_hex                  \\x{hexdigit}+
 
 puntuador                   "["|"]"|"("|")"|"{"|"}"|"."|"->"|"++"|"--"|"&"|"*"|"+"|"-"|"~"|"!"|"/"|"%"|"<<"|">>"|"<"|">"|"<="|">="|"=="|"!="|"^"|"|"|"&&"|"||"|"?"|":"|";"|"..."|"="|"*="|"/="|"%="|"+="|"-="|"<<="|">>="|"&="|"^="|"|="|","|"#"|"##"|"<:"|":>"|"<%"|"%>"|"%:"|"%:%:"
 
-comentario                  {comentario_sl}|{comentario_ml}
 comentario_sl               "//".*
 comentario_ml               "/*"([^*]|(\*+[^*/]))*"*"+"/"
 
-directiva                   {directiva_define}|{directiva_include}
-directiva_include           {directiva_prefijo}include([ \t]+{pre_token})+[ \t]*\n
-directiva_define            {directiva_prefijo}define[ \t]+{identificador}([ \t]*"("[ \t]*({lista_id}|...|{lista_id}[ \t]*,[ \t]*...)?[ \t]*")")?([ \t]+{pre_token})*[ \t]*\n
+directiva                   {directiva_include}|{directiva_define}
+directiva_include           [ \t]*#include([ \t]+{pre_token})+[ \t]*\n
+directiva_define            [ \t]*#define[ \t]+{identificador}([ \t]*"("[ \t]*({lista_id}|...|{lista_id}[ \t]*,[ \t]*...)?[ \t]*")")?([ \t]+{pre_token})*[ \t]*\n
 lista_id                    {identificador}(,{identificador})*
 pre_token                   {header}|{identificador}|{pre_number}|{const_char}|{literal_cadena}|{puntuador}
 header                      \<[^\>\n]+\>|\"[^\"\n]+\"
 pre_number                  "."?{digit}("."|{digit}|{identificador_nondigit}|[eEpP][\+\-])*
-directiva_prefijo           [ \t]*#
 
 %%
 
-{puntuador}                 { good_match(); lexeme_list_add_as_frequency_count(listas[PUNTUADOR], yytext);                      }
-{keyword_otro}              { good_match(); lexeme_list_add_with_string(listas[KEYWORD], yytext, "Otros");                      }
-{keyword_control}           { good_match(); lexeme_list_add_with_string(listas[KEYWORD], yytext, "Estructuras de control");     }
-{keyword_type}              { good_match(); lexeme_list_add_with_string(listas[KEYWORD], yytext, "Tipo de dato");               }
-{identificador}             { good_match(); lexeme_list_add_as_frequency_count(listas[IDENTIFICADOR], yytext);                  }
-{literal_cadena}            { good_match(); lexeme_list_add_simple_length_sorted(listas[LITERAL_CADENA], yytext) ;              }
-{entero_oct}                { good_match(); lexeme_list_add_simple(listas[CTE_OCT], yytext);                                    }
-{entero_hex}                { good_match(); lexeme_list_add_simple(listas[CTE_HEX], yytext);                                    }
-{entero_dec}                { good_match(); lexeme_list_add_simple(listas[CTE_DEC], yytext);                                    }
-{const_float}               { good_match(); lexeme_list_add_simple(listas[CTE_REAL], yytext);                                   }
-{const_char}                { good_match(); lexeme_list_add_simple(listas[CTE_CHAR], yytext);                                   }
-{comentario_sl}             { good_match(); lexeme_list_add_with_string(listas[COMENTARIO], yytext, "Comentario de una linea"); }
-{comentario_ml}             { good_match(); lexeme_list_add_with_string(listas[COMENTARIO], yytext, "Comentario multilinea");   }
-^{directiva}                { good_match(); lexeme_list_add_simple(listas[DIRECTIVA], yytext);                                         }
-[ \t\n]                     { good_match();                                                                                     }
-.                           { unrecognized[unrecognized_chars++] = yytext[0];                                                   }
+{puntuador}                 { good_match(); lexeme_list_add_as_frequency_count  (listas[PUNTUADOR]      , yytext                            ); }
+{keyword_otro}              { good_match(); lexeme_list_add_with_string         (listas[KEYWORD]        , yytext, "Otros"                   ); }
+{keyword_control}           { good_match(); lexeme_list_add_with_string         (listas[KEYWORD]        , yytext, "Estructuras de control"  ); }
+{keyword_type}              { good_match(); lexeme_list_add_with_string         (listas[KEYWORD]        , yytext, "Tipo de dato"            ); }
+{identificador}             { good_match(); lexeme_list_add_as_frequency_count  (listas[IDENTIFICADOR]  , yytext                            ); }
+{literal_cadena}            { good_match(); lexeme_list_add_simple_length_sorted(listas[LITERAL_CADENA] , yytext                            ); }
+{entero_oct}                { good_match(); lexeme_list_add_simple              (listas[CTE_OCT]        , yytext                            ); }
+{entero_hex}                { good_match(); lexeme_list_add_simple              (listas[CTE_HEX]        , yytext                            ); }
+{entero_dec}                { good_match(); lexeme_list_add_simple              (listas[CTE_DEC]        , yytext                            ); }
+{const_float}               { good_match(); lexeme_list_add_simple              (listas[CTE_REAL]       , yytext                            ); }
+{const_char}                { good_match(); lexeme_list_add_simple              (listas[CTE_CHAR]       , yytext                            ); }
+{comentario_ml}             { good_match(); lexeme_list_add_with_string         (listas[COMENTARIO]     , yytext, "Comentario multilinea"   ); }
+{comentario_sl}             { good_match(); lexeme_list_add_with_string         (listas[COMENTARIO]     , yytext, "Comentario de una linea" ); }
+^{directiva}                { good_match(); lexeme_list_add_simple              (listas[DIRECTIVA]      , yytext                            ); }
+[ \t\n]                     { good_match();                                   }
+.                           { unrecognized[unrecognized_chars++] = yytext[0]; }
 
 %%
 
 int main(int argc, char **argv) {
-    yyin = fopen(argv[1], "r");
+    yyin = fopen(argv[1], "r");   
     yyout = fopen("yyout.txt", "w");
     FILE* salida = stdout;
 
@@ -167,6 +159,9 @@ int main(int argc, char **argv) {
     yylex();
     mostrar_listas_en(salida);
     destruir_listas();
+
+    fclose(yyin);
+    fclose(yyout);
 
     return 0;
 }

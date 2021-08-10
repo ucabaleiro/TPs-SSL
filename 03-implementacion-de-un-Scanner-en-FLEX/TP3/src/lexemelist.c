@@ -77,12 +77,10 @@ void lexeme_list_add_as_frequency_count(t_lexeme_list* self, char* lexeme){
 
     t_record* entry = (t_record*) list_find(self->elements, _is_same_string);
 
-    if (entry != NULL){
+    if (entry != NULL)
         *(uint32_t*)entry->value += 1;
-    }
-    else{
+    else
         list_add_sorted(self->elements, (void*)record_create_with_int(lexeme, 1), _is_smaller_alpha);
-    }
 }
 
 int64_t lexeme_list_sum_as_int(t_lexeme_list* self){
