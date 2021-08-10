@@ -1,6 +1,7 @@
 %option noyywrap
 %option yylineno
 %option warn
+%option debug
 
 %{
 
@@ -37,9 +38,9 @@ void mostrar_listas_en(FILE* output) {
     lexeme_list_write (listas[IDENTIFICADOR] , output, "Identificadores"                      , as_frequency_count);
     lexeme_list_write (listas[LITERAL_CADENA], output, "Literales Cadena"                     , as_string_literal );
     lexeme_list_write (listas[KEYWORD]       , output, "Palabras Reservadas"                  , as_keyword        );
-    lexeme_list_write (listas[CTE_OCT]       , output, "Constantes Octales"                   , as_oct_hex        );
-    lexeme_list_write (listas[CTE_HEX]       , output, "Constantes Hexadecimales"             , as_is             );
-    lexeme_list_write (listas[CTE_DEC]       , output, "Constantes Decimales"                 , as_oct_hex        );
+    lexeme_list_write (listas[CTE_OCT]       , output, "Constantes Octales"                   , as_oct            );
+    lexeme_list_write (listas[CTE_HEX]       , output, "Constantes Hexadecimales"             , as_hex            );
+    lexeme_list_write (listas[CTE_DEC]       , output, "Constantes Decimales"                 , as_is             );
     
     lexeme_list_write_sum (listas[CTE_DEC], output);
 
@@ -145,7 +146,8 @@ pre_number                  "."?{digit}("."|{digit}|{identificador_nondigit}|[eE
 {comentario_ml}             { good_match(); lexeme_list_add_with_string         (listas[COMENTARIO]     , yytext, "Comentario multilinea"   ); }
 {comentario_sl}             { good_match(); lexeme_list_add_with_string         (listas[COMENTARIO]     , yytext, "Comentario de una linea" ); }
 ^{directiva}                { good_match(); lexeme_list_add_simple              (listas[DIRECTIVA]      , yytext                            ); }
-[ \t\n]                     { good_match();                                   }
+[ \t\n]                     { good_match(); }
+<<EOF>>                     { good_match(); return 0;}
 .                           { unrecognized[unrecognized_chars++] = yytext[0]; }
 
 %%

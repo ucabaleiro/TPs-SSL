@@ -10,9 +10,9 @@
     /* Imprime la sumatoria de una lista de lexemas interpretados como enteros */
     void lexeme_list_write_sum(t_lexeme_list* self, FILE* file);
 
-/* Funciones formato, imprimen un elemento de una lista de lexemas
- * Los nombres corresponden a lo consignado para cada lexema en el TP */
-
+/* Funciones formato: imprimen un elemento de una lista de lexemas
+ * Los nombres corresponden a lo consignado para cada lexema en el TP 
+ */
     /* Imprime solamente el lexema */
     void as_is(t_record* element, FILE* file);
 
@@ -22,8 +22,11 @@
     /* Imprime el lexema junto con el tipo de keyword que es */
     void as_keyword(t_record* element, FILE* file);
 
-    /* Imprime el lexema junto con su valor decimal */
-    void as_oct_hex(t_record* element, FILE* file);
+    /* Imprime un lexema octal junto con su valor decimal */
+    void as_oct(t_record* element, FILE* file);
+
+    /* Imprime un lexema hexa junto con su valor decimal */
+    void as_hex(t_record* element, FILE* file);
 
     /* Imprime el lexema junto con la parte entera y la mantisa de su valor real */
     void as_real(t_record* element, FILE* file);

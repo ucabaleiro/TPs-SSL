@@ -3,6 +3,7 @@
 #include <inttypes.h>
 #include <stdlib.h>
 #include <math.h>
+
 #include "list.h"
 #include "stringso.h"
 
@@ -33,8 +34,14 @@ void as_keyword(t_record* element, FILE* file){
     fprintf(file, "lexema: %s, tipo: %s\n", element->lexeme, (char*)element->value);
 }
 
-void as_oct_hex(t_record* element, FILE* file){
-    fprintf(file, "lexema: %s, valor decimal: %ld\n", element->lexeme, atol(element->lexeme));
+void as_oct(t_record* element, FILE* file){
+    char* tmp;
+    fprintf(file, "lexema: %s, valor decimal: %ld\n", element->lexeme, strtol(element->lexeme, &tmp, 8));
+}
+
+void as_hex(t_record* element, FILE* file){
+    char* tmp;
+    fprintf(file, "lexema: %s, valor decimal: %ld\n", element->lexeme, strtol(element->lexeme, &tmp, 16));
 }
 
 void as_real(t_record* element, FILE* file){

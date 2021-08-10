@@ -1,6 +1,8 @@
 #include "lexemelist.h"
+
 #include <stdlib.h>
 #include <string.h>
+
 #include "stringso.h"
 
 t_record* record_create(char* lexeme, void* value){
