@@ -1,7 +1,6 @@
 %option noyywrap
 %option yylineno
 %option warn
-%option debug
 
 %{
 
@@ -58,12 +57,15 @@ void destruir_listas() {
     }
 }
 
+/* Buffer con la ultima cadena no reconocida */
 char unrecognized[1024];
 int  unrecognized_chars = 0;
 
+/* Al matchear una expresion "correcta", agrega el contenido del buffer
+ * a la lista de cadenas no reconocidas */
 void good_match() {
     if(unrecognized_chars) {
-        lexeme_list_add_with_int(listas[NO_RECONOCIDO], unrecognized, yylineno);
+        lexeme_list_add_with_uint(listas[NO_RECONOCIDO], unrecognized, yylineno);
         memset(unrecognized, 0, sizeof unrecognized);
         unrecognized_chars = 0;
     }

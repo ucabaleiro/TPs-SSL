@@ -16,8 +16,8 @@ t_record* record_create_simple(char* lexeme){
     return record_create(lexeme, NULL);
 }
 
-t_record* record_create_with_int(char* lexeme, uint32_t value){
-	uint32_t* value_ptr = malloc(sizeof(int));
+t_record* record_create_with_uint(char* lexeme, uint32_t value){
+	uint32_t* value_ptr = malloc(sizeof(*value_ptr));
 	*value_ptr = value;
 	return record_create(lexeme, (void*)value_ptr);
 }
@@ -58,8 +58,8 @@ void lexeme_list_add_simple_length_sorted(t_lexeme_list* self, char* lexeme){
 	list_add_sorted(self->elements, (void*)record_create_simple(lexeme), _is_shorter);
 }
 
-void lexeme_list_add_with_int(t_lexeme_list* self, char* lexeme, uint32_t value){
-	list_add(self->elements, (void*)record_create_with_int(lexeme, value));
+void lexeme_list_add_with_uint(t_lexeme_list* self, char* lexeme, uint32_t value){
+	list_add(self->elements, (void*)record_create_with_uint(lexeme, value));
 }
 
 void lexeme_list_add_with_string(t_lexeme_list* self, char* lexeme, char* string){
@@ -82,7 +82,7 @@ void lexeme_list_add_as_frequency_count(t_lexeme_list* self, char* lexeme){
     if (entry != NULL)
         *(uint32_t*)entry->value += 1;
     else
-        list_add_sorted(self->elements, (void*)record_create_with_int(lexeme, 1), _is_smaller_alpha);
+        list_add_sorted(self->elements, (void*)record_create_with_uint(lexeme, 1), _is_smaller_alpha);
 }
 
 int64_t lexeme_list_sum_as_int(t_lexeme_list* self){

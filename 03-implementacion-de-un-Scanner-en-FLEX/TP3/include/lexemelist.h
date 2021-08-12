@@ -25,8 +25,8 @@
     /* Como add_simple, pero insertado de manera ordenada segun longitud */
     void lexeme_list_add_simple_length_sorted(t_lexeme_list* self, char* lexeme);
 
-    /* Agrega un lexema a una lista, acompañado de un entero complementario */
-    void lexeme_list_add_with_int(t_lexeme_list* self, char* lexeme, uint32_t value);
+    /* Agrega un lexema a una lista, acompañado de un entero no signado complementario */
+    void lexeme_list_add_with_uint(t_lexeme_list* self, char* lexeme, uint32_t value);
 
     /* Agrega un lexema a una lista, acompañado de una cadena complementaria */
     void lexeme_list_add_with_string(t_lexeme_list* self, char* lexeme, char* string);

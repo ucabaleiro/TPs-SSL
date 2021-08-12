@@ -267,13 +267,9 @@ static void yy_flex_free YY_PROTO(( void * ));
 
 #define yywrap() 1
 #define YY_SKIP_YYWRAP
-
-#define FLEX_DEBUG
 typedef unsigned char YY_CHAR;
 FILE *yyin = (FILE *) 0, *yyout = (FILE *) 0;
 typedef int yy_state_type;
-
-#define FLEX_DEBUG
 extern int yylineno;
 int yylineno = 1;
 extern char *yytext;
@@ -19047,15 +19043,6 @@ static yyconst short int yy_chk[78970] =
      3410, 3410, 3410, 3410, 3410, 3410, 3410, 3410, 3410
     } ;
 
-extern int yy_flex_debug;
-int yy_flex_debug = 1;
-
-static yyconst short int yy_rule_linenum[17] =
-    {   0,
-      135,  136,  137,  138,  139,  140,  141,  142,  143,  144,
-      145,  146,  147,  148,  149,  151
-    } ;
-
 static yy_state_type yy_state_buf[YY_BUF_SIZE + 2], *yy_state_ptr;
 static char *yy_full_match;
 static int yy_lp;
@@ -19072,7 +19059,7 @@ goto find_rule; \
 char *yytext;
 #line 1 "lex/TP3.l"
 #define INITIAL 0
-#line 7 "lex/TP3.l"
+#line 6 "lex/TP3.l"
 
 #include <stdio.h>
 #include <string.h>
@@ -19127,18 +19114,21 @@ void destruir_listas() {
     }
 }
 
+/* Buffer con la ultima cadena no reconocida */
 char unrecognized[1024];
 int  unrecognized_chars = 0;
 
+/* Al matchear una expresion "correcta", agrega el contenido del buffer
+ * a la lista de cadenas no reconocidas */
 void good_match() {
     if(unrecognized_chars) {
-        lexeme_list_add_with_int(listas[NO_RECONOCIDO], unrecognized, yylineno);
+        lexeme_list_add_with_uint(listas[NO_RECONOCIDO], unrecognized, yylineno);
         memset(unrecognized, 0, sizeof unrecognized);
         unrecognized_chars = 0;
     }
 }
 
-#line 19142 "src/TP3.c"
+#line 19132 "src/TP3.c"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -19292,10 +19282,10 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
 
-#line 133 "lex/TP3.l"
+#line 135 "lex/TP3.l"
 
 
-#line 19299 "src/TP3.c"
+#line 19289 "src/TP3.c"
 
 	if ( yy_init )
 		{
@@ -19384,114 +19374,99 @@ find_rule: /* we branch to this label when backing up */
 
 do_action:	/* This label is used only to access EOF actions. */
 
-		if ( yy_flex_debug )
-			{
-			if ( yy_act == 0 )
-				fprintf( stderr, "--scanner backing up\n" );
-			else if ( yy_act < 17 )
-				fprintf( stderr, "--accepting rule at line %d (\"%s\")\n",
-				         yy_rule_linenum[yy_act], yytext );
-			else if ( yy_act == 17 )
-				fprintf( stderr, "--accepting default rule (\"%s\")\n",
-				         yytext );
-			else if ( yy_act == 18 )
-				fprintf( stderr, "--(end of buffer or a NUL)\n" );
-			else
-				fprintf( stderr, "--EOF (start condition %d)\n", YY_START );
-			}
 
 		switch ( yy_act )
 	{ /* beginning of action switch */
 case 1:
 YY_RULE_SETUP
-#line 135 "lex/TP3.l"
+#line 137 "lex/TP3.l"
 { good_match(); lexeme_list_add_as_frequency_count  (listas[PUNTUADOR]      , yytext                            ); }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 136 "lex/TP3.l"
+#line 138 "lex/TP3.l"
 { good_match(); lexeme_list_add_with_string         (listas[KEYWORD]        , yytext, "Otros"                   ); }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 137 "lex/TP3.l"
+#line 139 "lex/TP3.l"
 { good_match(); lexeme_list_add_with_string         (listas[KEYWORD]        , yytext, "Estructuras de control"  ); }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 138 "lex/TP3.l"
+#line 140 "lex/TP3.l"
 { good_match(); lexeme_list_add_with_string         (listas[KEYWORD]        , yytext, "Tipo de dato"            ); }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 139 "lex/TP3.l"
+#line 141 "lex/TP3.l"
 { good_match(); lexeme_list_add_as_frequency_count  (listas[IDENTIFICADOR]  , yytext                            ); }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 140 "lex/TP3.l"
+#line 142 "lex/TP3.l"
 { good_match(); lexeme_list_add_simple_length_sorted(listas[LITERAL_CADENA] , yytext                            ); }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 141 "lex/TP3.l"
+#line 143 "lex/TP3.l"
 { good_match(); lexeme_list_add_simple              (listas[CTE_OCT]        , yytext                            ); }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 142 "lex/TP3.l"
+#line 144 "lex/TP3.l"
 { good_match(); lexeme_list_add_simple              (listas[CTE_HEX]        , yytext                            ); }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 143 "lex/TP3.l"
+#line 145 "lex/TP3.l"
 { good_match(); lexeme_list_add_simple              (listas[CTE_DEC]        , yytext                            ); }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 144 "lex/TP3.l"
+#line 146 "lex/TP3.l"
 { good_match(); lexeme_list_add_simple              (listas[CTE_REAL]       , yytext                            ); }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 145 "lex/TP3.l"
+#line 147 "lex/TP3.l"
 { good_match(); lexeme_list_add_simple              (listas[CTE_CHAR]       , yytext                            ); }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 146 "lex/TP3.l"
+#line 148 "lex/TP3.l"
 { good_match(); lexeme_list_add_with_string         (listas[COMENTARIO]     , yytext, "Comentario multilinea"   ); }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 147 "lex/TP3.l"
+#line 149 "lex/TP3.l"
 { good_match(); lexeme_list_add_with_string         (listas[COMENTARIO]     , yytext, "Comentario de una linea" ); }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 148 "lex/TP3.l"
+#line 150 "lex/TP3.l"
 { good_match(); lexeme_list_add_simple              (listas[DIRECTIVA]      , yytext                            ); }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 149 "lex/TP3.l"
+#line 151 "lex/TP3.l"
 { good_match(); }
 	YY_BREAK
 case YY_STATE_EOF(INITIAL):
-#line 150 "lex/TP3.l"
+#line 152 "lex/TP3.l"
 { good_match(); return 0;}
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 151 "lex/TP3.l"
+#line 153 "lex/TP3.l"
 { unrecognized[unrecognized_chars++] = yytext[0]; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 153 "lex/TP3.l"
+#line 155 "lex/TP3.l"
 ECHO;
 	YY_BREAK
-#line 19495 "src/TP3.c"
+#line 19470 "src/TP3.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -20375,7 +20350,7 @@ int main()
 	return 0;
 	}
 #endif
-#line 153 "lex/TP3.l"
+#line 155 "lex/TP3.l"
 
 
 int main(int argc, char **argv) {
