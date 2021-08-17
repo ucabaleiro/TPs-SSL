@@ -29,7 +29,8 @@ Un vistazo al directorio del TP.
     ├── obj
     ├── src
     ├── exec.sh
-    └── makefile
+    ├── makefile
+    └── TP3.exe
 ```
 * **`/so-commons-library`**: Directorio que contiene la biblioteca estática y headers de las commons.
 * **`/TP3`**
@@ -38,3 +39,4 @@ Un vistazo al directorio del TP.
     * **`/obj`**: Directorio con los archivos objeto `*.o` usados en la compilacion del ejecutable final.
     * **`/src`**: Directorio con todo el codigo fuente `*.c` de los modulos desarrollados.
     * **`makefile`** y **`exec.sh`**: Archivos para la compilacion y ejecucion del TP.
+    * **`TP3.exe`**: El ejecutable final del TP.
