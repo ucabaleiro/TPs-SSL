@@ -20354,17 +20354,27 @@ int main()
 
 
 int main(int argc, char **argv) {
-    yyin = fopen(argv[1], "r");   
+    yyin = NULL;
+    if(argc > 1)
+        yyin = fopen(argv[1], "r");
+    if(yyin == NULL)
+        yyin = fopen("archivo.c", "r");
+    if(yyin == NULL){
+        fprintf(stderr, "No se encontro el archivo de entrada.\n");
+        return EXIT_FAILURE;
+    }
     yyout = fopen("yyout.txt", "w");
-    FILE* salida = stdout;
+    FILE* salida = fopen("analisis_lexico.txt", "w");
 
     instanciar_listas();
     yylex();
+    mostrar_listas_en(stdout);
     mostrar_listas_en(salida);
     destruir_listas();
 
     fclose(yyin);
     fclose(yyout);
+    fclose(salida);
 
     return 0;
 }

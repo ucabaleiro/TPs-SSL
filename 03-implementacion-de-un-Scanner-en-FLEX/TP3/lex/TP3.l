@@ -4,10 +4,11 @@
 
 %{
 
-#include <stdio.h>
-#include <string.h>
 #include "lexemelist.h"
 #include "writers.h"
+
+#include <stdio.h>
+#include <string.h>
 
 typedef enum token {
     IDENTIFICADOR, 
@@ -149,23 +150,34 @@ pre_number                  "."?{digit}("."|{digit}|{identificador_nondigit}|[eE
 {comentario_sl}             { good_match(); lexeme_list_add_with_string         (listas[COMENTARIO]     , yytext, "Comentario de una linea" ); }
 ^{directiva}                { good_match(); lexeme_list_add_simple              (listas[DIRECTIVA]      , yytext                            ); }
 [ \t\n]                     { good_match(); }
-<<EOF>>                     { good_match(); return 0;}
-.                           { unrecognized[unrecognized_chars++] = yytext[0]; }
+<<EOF>>                     { good_match(); return 0; }
+.                           { unrecognized[unrecognized_chars++] = yytext[0]; /* Carga el caracter al buffer no reconocido */ }
 
 %%
 
 int main(int argc, char **argv) {
-    yyin = fopen(argv[1], "r");   
+    // Error checking en el archivo de entrada
+    yyin = NULL;
+    if(argc > 1)
+        yyin = fopen(argv[1], "r");
+    if(yyin == NULL)
+        yyin = fopen("archivo.c", "r");
+    if(yyin == NULL){
+        fprintf(stderr, "No se encontro el archivo de entrada.\n");
+        return EXIT_FAILURE;
+    }
     yyout = fopen("yyout.txt", "w");
-    FILE* salida = stdout;
+    FILE* salida = fopen("analisis_lexico.txt", "w");
 
     instanciar_listas();
     yylex();
+    mostrar_listas_en(stdout);
     mostrar_listas_en(salida);
     destruir_listas();
 
     fclose(yyin);
     fclose(yyout);
+    fclose(salida);
 
     return 0;
 }
