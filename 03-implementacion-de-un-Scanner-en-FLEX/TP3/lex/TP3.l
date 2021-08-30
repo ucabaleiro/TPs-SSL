@@ -92,8 +92,6 @@ identificador_nondigit      {nondigit}|{caracter_universal}
 caracter_universal          \\[uU]{hex_quad}{1,2}
 hex_quad                    {hexdigit}{4}
 
-
-
 const_entero                ({entero_dec}|{entero_hex}|{entero_oct}){sufijo_entero}?
 entero_dec		            {nonzero}{digit}*{sufijo_entero}?
 entero_hex                  {prefijo_hex}{hexdigit}+{sufijo_entero}?
@@ -109,7 +107,7 @@ exponente_dec               [eE]{exponente}
 exponente_hex               [pP]{exponente}
 exponente                   [\+\-]?{digit}+
 
-const_char                  L?[']{c_char}+[']
+const_char                  L?[']{c_char}[']
 c_char                      [^\'\\\n]|{escape}
 
 literal_cadena              L?\"{s_char}*\"

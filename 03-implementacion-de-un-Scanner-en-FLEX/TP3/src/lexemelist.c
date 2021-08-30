@@ -40,7 +40,7 @@ void lexeme_list_destroy(t_lexeme_list *self){
     	free(r_entry->lexeme);
 		free(r_entry->value);
     	free(r_entry);
-    }
+    };
     list_destroy_and_destroy_elements(self->elements, _record_destroyer);
 	free(self);
 }
@@ -54,7 +54,7 @@ void lexeme_list_add_simple_length_sorted(t_lexeme_list* self, char* lexeme){
 		t_record* r_entry = (t_record*)entry;
         t_record* r_entry2 = (t_record*)entry2;
         return (string_length(r_entry->lexeme) < string_length(r_entry2->lexeme));
-	}
+	};
 	list_add_sorted(self->elements, (void*)record_create_simple(lexeme), _is_shorter);
 }
 
@@ -70,12 +70,12 @@ void lexeme_list_add_as_frequency_count(t_lexeme_list* self, char* lexeme){
 	bool _is_same_string(void* entry){
         t_record* r_entry = (t_record*)entry;
         return !strcmp(r_entry->lexeme, lexeme);
-    }
+    };
 	bool _is_smaller_alpha(void* entry, void* entry2){
         t_record* r_entry = (t_record*)entry;
         t_record* r_entry2 = (t_record*)entry2;
         return (strcmp(r_entry->lexeme, r_entry2->lexeme) < 1);
-    }
+    };
 
     t_record* entry = (t_record*) list_find(self->elements, _is_same_string);
 
@@ -92,7 +92,7 @@ int64_t lexeme_list_sum_as_int(t_lexeme_list* self){
 		int64_t r_entry2_value = (int64_t)atol(r_entry2->lexeme);
 		*r_entry = *r_entry + r_entry2_value;
 		return (void*)r_entry; 
-	}
+	};
 	int64_t seed = 0;
 	seed = *(int64_t*)list_fold(self->elements, (void*)&seed, _partial_sum);
 	return seed;

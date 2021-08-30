@@ -10,7 +10,7 @@
 void lexeme_list_write(t_lexeme_list* self, FILE* file, char* title, void(*write_as)(t_record*, FILE*)){
     void _write_as(void* element){
         write_as((t_record*)element, file);
-    }
+    };
     char* line = string_repeat('-', string_length(title));
     fprintf(file, "%s\n%s\n", title, line);
     free(line);
@@ -27,7 +27,7 @@ void as_is(t_record* element, FILE* file){
 }
 
 void as_string_literal(t_record* element, FILE* file){
-    fprintf(file, "lexema: %s, longitud: %i\n", element->lexeme, string_length(element->lexeme));
+    fprintf(file, "lexema: %s, longitud: %i\n", element->lexeme, string_length(element->lexeme)-2);
 }
 
 void as_keyword(t_record* element, FILE* file){
