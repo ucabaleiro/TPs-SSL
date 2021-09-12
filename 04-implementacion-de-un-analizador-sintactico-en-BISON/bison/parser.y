@@ -13,6 +13,73 @@
 }
 
 %token AUTO
+%token BREAK
+%token CASE
+%token CHAR
+%token CONST
+%token CONTINUE
+%token DEFAULT
+%token DO
+%token DOUBLE
+%token ELSE
+%token ENUM
+%token EXTERN
+%token FLOAT
+%token FOR
+%token GOTO
+%token IF
+%token INLINE
+%token INT
+%token LONG
+%token REGISTER
+%token RESTRICT
+%token SHORT
+%token SIGNED
+%token SIZOF
+%token STATIC
+%token STRUCT
+%token SWITCH
+%token TYPEDEF
+%token UNION
+%token UNSIGNED
+%token VOID
+%token VOLATILE
+%token WHILE
+%token BOOL
+%token COMPLEX
+%token IMAGINARY
+
+
+%token MASMAS "++"
+%token MENOSMENOS "--"
+%token SHIFT_LEFT "<<"
+%token SHIFT_RIGHT ">>"
+%token MENOR_IGUAL ">="
+%token MAYOR_IGUAL ""
+%token IGUALIGUAL
+%token DIFERENTE
+%token AND
+%token OR
+%token VARIARG
+%token ASIGN_MULT
+%token ASIGN_DIV
+%token ASIGN_MOD
+%token ASIGN_SUM
+%token ASIGN_RESTA
+%token ASIGN_SHIFT_LEFT
+%token ASIGN_SHIFT_RIGHT
+%token ASIGN_BITWISE_AND
+%token ASIGN_BITWISE_XOR
+%token ASIGN_BITWISE_OR
+%token HASHHASH
+%token ALT_CORCHETE_APERTURA
+%token ALT_CORCHETE_CIERRE
+%token ALT_LLAVE_APERTURA
+%token ALT_LLAVE_CIERRE
+%token ALT_HASH
+%token ALT_HASHHASH
+
+
 
 %start primary_expression
 
@@ -193,5 +260,5 @@ declarator:   pointer direct_declarator
 
 direct_declarator:    IDENTIFIER
                     | ( declarator )
-                    | direct_declarator [ type_qualifier_list.opt assignment_expression.opt]       // HACER OPTS
+                    | direct_declarator [ type_qualifier_list.opt assignment_expression.opt]       // HACER OPTS!!!!!!!!!!!!!!!!!
                     | direct_declarator [ STATIC type_qualifier_list.opt assignment_expression]
