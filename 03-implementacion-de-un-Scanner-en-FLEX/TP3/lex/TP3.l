@@ -107,7 +107,7 @@ exponente_dec               [eE]{exponente}
 exponente_hex               [pP]{exponente}
 exponente                   [\+\-]?{digit}+
 
-const_char                  L?[']{c_char}[']
+const_char                  L?[']{c_char}+[']
 c_char                      [^\'\\\n]|{escape}
 
 literal_cadena              L?\"{s_char}*\"
