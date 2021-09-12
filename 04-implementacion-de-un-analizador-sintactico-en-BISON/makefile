@@ -24,7 +24,7 @@ $(ODIR)/%.o: $(SRCDIR)/%.c $(DEPS) $(COMMONS_DEPS) | $(ODIR)
 $(SRCDIR)/lexer.c: $(LEXDIR)/lexer.l
 	flex -o$@ $^
 
-$(SRCDIR)/parser.c: $(LEXDIR)/parser.y
+$(SRCDIR)/parser.c: $(BISDIR)/parser.y
 	bison --defines=$(IDIR)/parser.h -o$@ $^
 
 $(ODIR):
