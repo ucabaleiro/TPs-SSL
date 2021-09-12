@@ -6,22 +6,6 @@
 
 extern FILE* yyin;
 
-typedef enum token {
-    IDENTIFICADOR, 
-    LITERAL_CADENA, 
-    KEYWORD, 
-    CTE_OCT, 
-    CTE_HEX, 
-    CTE_DEC,
-    CTE_REAL, 
-    CTE_CHAR, 
-    PUNTUADOR, 
-    COMENTARIO, 
-    DIRECTIVA, 
-    NO_RECONOCIDO, 
-    MAX_TOKENS
-} t_token; 
-
 %}
 
 alpha                       [a-zA-Z]
@@ -90,6 +74,99 @@ header                      \<[^\>\n]+\>|\"[^\"\n]+\"
 pre_number                  "."?{digit}("."|{digit}|{identificador_nondigit}|[eEpP][\+\-])*
 
 %%
+
+"auto"                      {return AUTO;}
+"break"                     {return BREAK;}
+"case"                      {return CASE;}
+"char"                      {return CHAR;}
+"const"                     {return CONST;}
+"continue"                  {return CONTINUE;}
+"default"                   {return DEFAULT;}
+"do"                        {return DO;}
+"double"                    {return DOUBLE;}
+"else"                      {return ELSE;}
+"enum"                      {return ENUM;}
+"extern"                    {return EXTERN;}
+"float"                     {return FLOAT;}
+"for"                       {return FOR;}
+"goto"                      {return GOTO;}
+"if"                        {return IF;}
+"inline"                    {return INLINE;}
+"int"                       {return INT;}
+"long"                      {return LONG;}
+"register"                  {return REGISTER;}
+"restrict"                  {return RESTRICT;}
+"short"                     {return SHORT;}
+"signed"                    {return SIGNED;}
+"sizeof"                    {return SIZOF;}
+"static"                    {return STATIC;}
+"struct"                    {return STRUCT;}
+"switch"                    {return SWITCH;}
+"typedef"                   {return TYPEDEF;}
+"union"                     {return UNION;}
+"unsigned"                  {return UNSIGNED;}
+"void"                      {return VOID;}
+"volatile"                  {return VOLATILE;}
+"while"                     {return WHILE;}
+"_Bool"                     {return BOOL;}
+"_Complex"                  {return COMPLEX;}
+"_Imaginary"                {return IMAGINARY;}
+
+"["                         {return '[';}
+"]"                         {return ']';}
+"("                         {return '(';}
+")"                         {return ')';}
+"{"                         {return '{';}
+"}"                         {return '}';}
+"."                         {return '.';}
+"++"                        {return MASMAS;}
+"--"                        {return MENOSMENOS;}
+"&"                         {return '&';}
+"*"                         {return '*';}
+"+"                         {return '+';}
+"-"                         {return '-';}
+"~"                         {return '~';}
+"!"                         {return '!';}
+"/"                         {return '/';}
+"%"                         {return '%';}
+"<<"                        {return SHIFT_LEFT;}
+">>"                        {return SHIFT_RIGHT;}
+"<"                         {return '<';}
+">"                         {return '>';}
+"<="                        {return MENOR_IGUAL;}
+">="                        {return MAYOR_IGUAL;}
+"=="                        {return IGUALIGUAL;}
+"!="                        {return DIFERENTE;}
+"^"                         {return '^';}
+"|"                         {return '|';}
+"&&"                        {return AND;}
+"||"                        {return OR;}
+"?"                         {return '?';}
+":"                         {return ':';}
+";"                         {return ';';}
+"..."                       {return VARIARG;}
+"="                         {return '=';}
+"*="                        {return ASIGN_MULT;}
+"/="                        {return ASIGN_DIV;}
+"%="                        {return ASIGN_MOD;}
+"+="                        {return ASIGN_SUM;}
+"-="                        {return ASIGN_RESTA;}
+"<<="                       {return ASIGN_SHIFT_LEFT;}
+">>="                       {return ASIGN_SHIFT_RIGHT;}
+"&="                        {return ASIGN_BITWISE_AND;}
+"^="                        {return ASIGN_BITWISE_XOR;}
+"|="                        {return ASIGN_BITWISE_OR;}
+","                         {return ',';}
+"#"                         {return '#';}
+"##"                        {return HASHHASH;}
+"<:"                        {return ALT_CORCHETE_APERTURA;}
+":>"                        {return ALT_CORCHETE_CIERRE;}
+"<%"                        {return ALT_LLAVE_APERTURA;}
+"%>"                        {return ALT_LLAVE_CIERRE;}
+"%:"                        {return ALT_HASH;}
+"%:%:"                      {return ALT_HASHHASH;}
+
+
 
 
 %%
