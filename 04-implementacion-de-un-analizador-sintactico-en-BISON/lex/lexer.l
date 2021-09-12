@@ -33,9 +33,15 @@ hexdigit                    [0-9a-fA-F]
 prefijo_hex                 0[xX]
 octdigit                    [0-7]
 
-keyword_otro                extern|inline|sizeof
+keyword                     {storage_class_specifier}|{simple_type_specifier}|{struct_or_union}|{type_qualifier}|_Imaginary|sizeof
+function_specifier          inline
 keyword_control             break|case|continue|default|do|else|for|goto|if|return|switch|while
-keyword_type                auto|char|const|double|enum|float|int|long|register|restrict|short|signed|static|struct|typedef|union|unsigned|void|volatile|_Bool|_Complex|_Imaginary
+keyword_enum                enum
+storage_class_specifier     typedef|extern|auto|register|static
+simple_type_specifier       void|char|short|int|long|float|double|signed|unsigned|_Bool|_Complex
+struct_or_union             struct|union
+type_qualifier              const|restrict|volatile
+
 
 identificador               {identificador_nondigit}({identificador_nondigit}|{digit})*
 identificador_nondigit      {nondigit}|{caracter_universal}
@@ -68,8 +74,9 @@ escape_simple               \\[abfnrtv\'\"\?\\]
 escape_oct                  \\{octdigit}{1,3}
 escape_hex                  \\x{hexdigit}+
 
-puntuador                   {unary_operator}|"["|"]"|"("|")"|"{"|"}"|"."|"->"|"++"|"--"|"/"|"%"|"<<"|">>"|"<"|">"|"<="|">="|"=="|"!="|"^"|"|"|"&&"|"||"|"?"|":"|";"|"..."|"="|"*="|"/="|"%="|"+="|"-="|"<<="|">>="|"&="|"^="|"|="|","|"#"|"##"|"<:"|":>"|"<%"|"%>"|"%:"|"%:%:"
+puntuador                   {unary_operator}|"["|"]"|"("|")"|"{"|"}"|"."|"->"|"++"|"--"|"/"|"%"|"<<"|">>"|"<"|">"|"<="|">="|"=="|"!="|"^"|"|"|"&&"|"||"|"?"|":"|";"|"..."|","|"#"|"##"|"<:"|":>"|"<%"|"%>"|"%:"|"%:%:"
 unary_operator              "&"|"*"|"+"|"-"|"~"|"!"
+assignment_operator         "="|"*="|"/="|"%="|"+="|"-="|"<<="|">>="|"&="|"^="|"|="
 
 comentario_sl               "//".*
 comentario_ml               "/*"([^*]|(\*+[^*/]))*"*"+"/"
@@ -83,7 +90,6 @@ header                      \<[^\>\n]+\>|\"[^\"\n]+\"
 pre_number                  "."?{digit}("."|{digit}|{identificador_nondigit}|[eEpP][\+\-])*
 
 %%
-
 
 
 %%
