@@ -17,16 +17,6 @@ hexdigit                    [0-9a-fA-F]
 prefijo_hex                 0[xX]
 octdigit                    [0-7]
 
-keyword                     {storage_class_specifier}|{simple_type_specifier}|{struct_or_union}|{type_qualifier}|_Imaginary|sizeof
-function_specifier          inline
-keyword_control             break|case|continue|default|do|else|for|goto|if|return|switch|while
-keyword_enum                enum
-storage_class_specifier     typedef|extern|auto|register|static
-simple_type_specifier       void|char|short|int|long|float|double|signed|unsigned|_Bool|_Complex
-struct_or_union             struct|union
-type_qualifier              const|restrict|volatile
-
-
 identificador               {identificador_nondigit}({identificador_nondigit}|{digit})*
 identificador_nondigit      {nondigit}|{caracter_universal}
 caracter_universal          \\[uU]{hex_quad}{1,2}
@@ -57,10 +47,6 @@ escape                      {escape_simple}|{escape_oct}|{escape_hex}|{caracter_
 escape_simple               \\[abfnrtv\'\"\?\\]
 escape_oct                  \\{octdigit}{1,3}
 escape_hex                  \\x{hexdigit}+
-
-puntuador                   {unary_operator}|"["|"]"|"("|")"|"{"|"}"|"."|"->"|"++"|"--"|"/"|"%"|"<<"|">>"|"<"|">"|"<="|">="|"=="|"!="|"^"|"|"|"&&"|"||"|"?"|":"|";"|"..."|","|"#"|"##"|"<:"|":>"|"<%"|"%>"|"%:"|"%:%:"
-unary_operator              "&"|"*"|"+"|"-"|"~"|"!"
-assignment_operator         "="|"*="|"/="|"%="|"+="|"-="|"<<="|">>="|"&="|"^="|"|="
 
 comentario_sl               "//".*
 comentario_ml               "/*"([^*]|(\*+[^*/]))*"*"+"/"
@@ -119,6 +105,7 @@ pre_number                  "."?{digit}("."|{digit}|{identificador_nondigit}|[eE
 "{"                         {return '{';}
 "}"                         {return '}';}
 "."                         {return '.';}
+"->"                        {return FLECHA;}
 "++"                        {return MASMAS;}
 "--"                        {return MENOSMENOS;}
 "&"                         {return '&';}
@@ -165,8 +152,5 @@ pre_number                  "."?{digit}("."|{digit}|{identificador_nondigit}|[eE
 "%>"                        {return ALT_LLAVE_CIERRE;}
 "%:"                        {return ALT_HASH;}
 "%:%:"                      {return ALT_HASHHASH;}
-
-
-
 
 %%
