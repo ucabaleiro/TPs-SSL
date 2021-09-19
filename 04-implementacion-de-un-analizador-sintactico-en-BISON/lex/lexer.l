@@ -153,4 +153,11 @@ pre_number                  "."?{digit}("."|{digit}|{identificador_nondigit}|[eE
 "%:"                        {return ALT_HASH;}
 "%:%:"                      {return ALT_HASHHASH;}
 
+"ifdef"                     {return IFDEF;}
+"ifndef"                    {return IFNDEF;}
+"elif"                      {return ELIF;}
+"endif"                     {return ENDIF;}
+
+{identificador}             {yylval.strval = yytext; return IDENFI}
+
 %%

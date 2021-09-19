@@ -9,7 +9,9 @@
 %union
 {
     char* strval;
+    char cval;
     int ival;
+    double dval;
 }
 
 %token AUTO
@@ -48,7 +50,6 @@
 %token BOOL
 %token COMPLEX
 %token IMAGINARY
-
 %token FLECHA "->"
 %token MASMAS "++"
 %token MENOSMENOS "--"
@@ -79,23 +80,43 @@
 %token ALT_HASH "%:"
 %token ALT_HASHHASH "%:%:"
 
+%token <strval> IDENTIFIER
+%token <cval>   CHAR_CONST
+%token <intval> INT_CONST
+%token <dval>   REAL_CONST
+%token <strval> STRING_LITERAL
+
+%token IFDEF
+%token IFNDEF
+%token ELIF
+%token ENDIF
+
 %start primary_expression
 
 %%
 
-enumeration_constant: IDENTIFIER; /* TODO: refacherizar todas las otras constantes */
+identifier: IDENTIFIER ;
 
-primary_expression:   IDENTIFIER
-                    | CONSTANT
-                    | STRING_LITERAL
+constant:     CHAR_CONST
+            | INT_CONST
+            | REAL_CONST
+            ;
+
+string_literal: STRING_LITERAL ;
+
+enumeration_constant: identifier ; /* TODO: refacherizar todas las otras constantes */
+
+primary_expression:   identifier
+                    | constant
+                    | string_literal
                     | '(' expression ')'
                     ;
 
 postfix_expression:   primary_expression
                     | postfix_expression '[' expression ']'
                     | postfix_expression '(' argument_expression_list ')'
-                    | postfix_expression '.' IDENTIFIER
-                    | postfix_expression "->" IDENTIFIER
+                    | postfix_expression '.' identifier
+                    | postfix_expression "->" identifier
                     | postfix_expression "++"
                     | postfix_expression "--"
                     | '(' type_name ')' '{' initializer_list '}'
@@ -187,9 +208,11 @@ expression:   assignment_expression
 
 constant_expression: conditional_expression ;
 
-declaration:      declaration_specifiers ;
-                | declaration_specifiers initi_declarator_list ;
-                ;
+declaration: declaration_specifiers init_declarator_list.opt ';' ;
+
+init_declarator_list.opt:     /* empty */
+                            | init_declarator_list
+                            ; 
 
 declaration_specifiers:   storage_class_specifier declaration_specifiers.opt
                         | type_specifier declaration_specifiers.opt
@@ -217,9 +240,9 @@ type_specifier:   VOID | CHAR | SHORT | INT | LONG | FLOAT | DOUBLE | SIGNED | U
                 | typedef_name
                 ;
 
-struct_or_union_specifier:    struct_or_union IDENTIFIER '{' struct_declaration_list '}'
+struct_or_union_specifier:    struct_or_union identifier '{' struct_declaration_list '}'
                             | struct_or_union '{' struct_declaration_list '}'
-                            | struct_or_union IDENTIFIER
+                            | struct_or_union identifier
                             ;
 
 struct_or_union: STRUCT | UNION ;
@@ -256,7 +279,7 @@ enum_specifier:   ENUM identifier.opt '{' enumerator_list '}'
                 ;
 
 identifier.opt:   /* empty */
-                | IDENTIFIER
+                | identifier
                 ;
 
 enumerator_list:      enumerator
@@ -275,7 +298,225 @@ declarator:   pointer direct_declarator
             | direct_declarator
             ;
 
-direct_declarator:    IDENTIFIER /* TODO: HACER OPTS!!!!!!!!!!!!!!!!! */
+direct_declarator:    identifier
                     | '(' declarator ')'
                     | direct_declarator '[' type_qualifier_list.opt assignment_expression.opt ']'
                     | direct_declarator '[' STATIC type_qualifier_list.opt assignment_expression ']'
+                    | direct_declarator '[' type_qualifier_list STATIC assignment_expression ']'
+                    | direct_declarator '[' type_qualifier_list.opt '*' ']'
+                    | direct_declarator '(' parameter_type_list ')'
+                    | direct_declarator (identifier_list.opt)
+                    ;
+
+assignment_expression.opt:    /* empty */
+                            | assignment_expression
+                            ;
+
+type_qualifier_list.opt:      /* empty */
+                            | type_qualifier_list
+                            ;
+
+type_qualifier_list.opt:      /* empty */
+                            | assignment_expression
+                            ;
+
+identifier_list.opt:      /* empty */
+                        | type_qualifier_list
+                        ;
+
+pointer:      '*' type_qualifier_list.opt
+            | '*' type_qualifier_list.opt pointer
+            ;
+
+type_qualifier_list:      type_qualifier
+                        | type_qualifier_list type_qualifier
+                        ;
+
+parameter_type_list:      parameter_list
+                        | parameter_type_list ',' VARIARG
+                        ;
+
+parameter_list:   parameter_declaration
+                | parameter_list ',' parameter_declaration
+                ;
+
+parameter_declaration:    declaration_specifiers declarator
+                        | declaration_specifiers abstract_declarator
+                        | declaration_specifiers
+                        ;
+
+identifier_list:      identifier
+                    | identifier_list ',' identifier
+                    ;
+
+type_name:    speficier_qualifier_list
+            | speficier_qualifier_list abstract_declarator
+            ;
+
+abstract_declarator:      pointer
+                        | pointer direct_abstract_declarator
+                        | direct_abstract_declarator
+                        ;
+
+direct_abstract_declarator:   '(' abstract_declarator ')'
+                            | direct_abstract_declarator.opt '['  assignment_expression.opt ']'
+                            | direct_abstract_declarator.opt '[' '*' ']'
+                            | direct_abstract_declarator.opt '(' parameter_type_list ')'
+                            | direct_abstract_declarator.opt '(' ')'
+                            ;
+
+typedef_name: identifier ;
+
+initializer:      assignment_expression
+                | '{' initializer_list '}'
+                | '{' initializer_list ',' '}'
+                ;
+                
+initializer_list:     designation.opt initializer
+                    | initializer_list ',' designation.opt initializer
+                    ;
+
+designation:      designator_list '=';
+
+designator_list:      designator
+                    | designator_list designator_list
+                    ;
+
+designator:   '[' constant_expression ']'
+            | '.' identifier
+
+
+statement:    labeled_statement
+            | compound_statement
+            | expression_statement
+            | selection_statement
+            | iteration_statement
+            | jump_statement
+            ;
+
+labeled_statement:    identifier ':' statement
+                    | CASE constant_expression ':' statement
+                    | DEFAULT ':' statement
+                    ;
+
+compound_statement: '{' block_item_list.opt '}' ;
+
+block_item_list.opt:      /* empty */
+                        | block_item_list
+                        ;
+
+block_item_list:      block_item
+                    | block_item_list block_item
+                    ;
+
+block_item:   declaration
+            | statement
+            ;
+
+expression_statement: expression.opt ';' ;
+
+expression.opt:   /* empty */
+                | expression
+                ;
+
+selection_statement:      IF '(' expression ')' statement else_block.opt
+                        | SWITCH '(' expression ')' statement
+                        ;
+
+else_block.opt:   /* empty */
+                | ELSE statement
+                ;
+
+iteration_statement:      WHILE '(' expression ')' statement
+                        | DO statement WHILE '(' expression ')' ';'
+                        | FOR '(' expression.opt ';' expression.opt ';' expression.opt ')' statement
+                        | FOR '(' declaration expression.opt ';' expression.opt ')' statement
+                        ;
+
+jump_statement:   GOTO identifier ';'
+                | CONTINUE ';'
+                | BREAK ';'
+                | RETURN expression.opt ';'
+                ;
+
+translation_unit:     external_declaration
+                    | translation_unit external_declaration
+                    ;
+
+external_declaration:     function_definition
+                        | declaration
+                        ;
+
+function_definition:      declaration_specifiers declarator declaration_list.opt compound_statement ;
+
+declaration_list.opt:     /* empty */
+                        | declaration_list
+                        ;
+
+declaration_list:     declaration
+                    | declaration_list declaration
+                    ;
+
+preprocessing_file:   /* empty */
+                    | group
+                    ;
+
+group:    group_part
+        | group group_part
+        ;
+
+group_part:   if_section
+            | control_line
+            | text_line
+            | '#' non_directive
+            ;
+
+if_section: if_group elif_groups.opt else_group.opt endif_line ;
+
+elif_groups.opt:      /* empty */
+                    | elif_groups
+                    ;
+
+else_group.opt:   /* empty */
+                | else_group
+                ;
+
+/*
+* Agregar
+*   IF
+*   IFDEF
+*   IFNDEF
+*   ELIF
+*   ELSE
+*   ENDIF
+*/
+
+if_group:     '#' IF constant_expression new_line group.opt
+            | '#' IFDEF identifier new_line group.opt
+            | '#' IFNDEF identifier new_line group.opt
+            ;
+
+elif_groups:      elif_group
+                | elif_groups elif_group
+                ;
+
+elif_group:   '#' ELIF constant_expression new_line group.opt;
+
+else_group:   '#' ELSE new_line group.opt;
+
+endif_line:   '#' ENDIF new_line;
+
+control_line: '#' directive;
+
+directive:    define_directive
+            | INCLUDE pp_tokens
+            | UNDEF identifier new_line
+            | LINE pp_tokens new_line
+            | ERROR pp_tokens.opt new_line
+            | PRAGMA pp_tokens.opt new_line
+            | new_line
+            ;
+
+pp_tokens.opt:    /* empty */
+                | pp_tokens
+                ;
