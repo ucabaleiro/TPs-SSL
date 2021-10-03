@@ -6,85 +6,55 @@
     extern int yylineno;
 %}
 
+/* No hay Constantes caracter por el momento, la BNF del vol. 1 no las contempla, las variables char igual existen ya que son numeros */
+/* No hay literales cadena por el momento, la BNF del vol. 1 no las contempla */
+/* No se considera el switch, la BNF del vol. 1 no contempla la keyword */
+
+typedef enum types { t_int, t_double, t_ptr } types;
+
+typedef union val {
+    int ival;
+    double dval;
+    unsigned int pval;
+} val;
+
+typedef struct num {
+    types type;
+    val value;
+} num;
+
 %union
 {
     char* strval;
-    char cval;
-    int ival;
-    double dval;
+    num numval;
 }
 
-%token AUTO
-%token BREAK
-%token CASE
 %token CHAR
-%token CONST
-%token CONTINUE
-%token DEFAULT
 %token DO
 %token DOUBLE
 %token ELSE
-%token ENUM
-%token EXTERN
 %token FLOAT
-%token FOR
-%token GOTO
 %token IF
-%token INLINE
 %token INT
 %token LONG
-%token REGISTER
-%token RESTRICT
-%token SHORT
-%token SIGNED
+%token RETURN
 %token SIZOF
-%token STATIC
 %token STRUCT
-%token SWITCH
 %token TYPEDEF
-%token UNION
-%token UNSIGNED
 %token VOID
-%token VOLATILE
 %token WHILE
-%token BOOL
-%token COMPLEX
-%token IMAGINARY
-%token FLECHA "->"
+
 %token MASMAS "++"
-%token MENOSMENOS "--"
-%token SHIFT_LEFT "<<"
-%token SHIFT_RIGHT ">>"
 %token MENOR_IGUAL "<="
-%token MAYOR_IGUAL ">="
 %token IGUALIGUAL "=="
 %token DIFERENTE "!="
 %token AND "&&"
 %token OR "||"
-%token VARIARG "..."
-%token ASIGN_MULT "*="
-%token ASIGN_DIV "/="
-%token ASIGN_MOD "%="
 %token ASIGN_SUM "+="
-%token ASIGN_RESTA "-="
-%token ASIGN_SHIFT_LEFT "<<="
-%token ASIGN_SHIFT_RIGHT ">>="
-%token ASIGN_BITWISE_AND "&="
-%token ASIGN_BITWISE_XOR "^="
-%token ASIGN_BITWISE_OR "|="
-%token HASHHASH "##"
-%token ALT_CORCHETE_APERTURA "<:"
-%token ALT_CORCHETE_CIERRE ":>"
-%token ALT_LLAVE_APERTURA "<%"
-%token ALT_LLAVE_CIERRE "%>"
-%token ALT_HASH "%:"
-%token ALT_HASHHASH "%:%:"
 
 %token <strval> IDENTIFIER
-%token <cval>   CHAR_CONST
-%token <intval> INT_CONST
-%token <dval>   REAL_CONST
-%token <strval> STRING_LITERAL
+%token <numval> INT_CONST
+%token <numval> REAL_CONST
 
 %token IFDEF
 %token IFNDEF
@@ -95,428 +65,141 @@
 
 %%
 
-identifier: IDENTIFIER ;
+identificador: IDENTIFIER ;
 
-constant:     CHAR_CONST
-            | INT_CONST
+constante:     INT_CONST
             | REAL_CONST
             ;
 
-string_literal: STRING_LITERAL ;
+operador:     '++' | '*' | '+' | '&' | '!' | SIZEOF | '/' | '%' | '<' 
+            | "<=" | "==" | "!=" | "&&" | "||" | "?:" | '=' | "+=" ;
 
-enumeration_constant: identifier ; /* TODO: refacherizar todas las otras constantes */
+puntuador: '(' | ')' | '{' | '}' | ',' | ';' ;
 
-primary_expression:   identifier
-                    | constant
-                    | string_literal
-                    | '(' expression ')'
-                    ;
+expresion: expAsignacion ;
 
-postfix_expression:   primary_expression
-                    | postfix_expression '[' expression ']'
-                    | postfix_expression '(' argument_expression_list ')'
-                    | postfix_expression '.' identifier
-                    | postfix_expression "->" identifier
-                    | postfix_expression "++"
-                    | postfix_expression "--"
-                    | '(' type_name ')' '{' initializer_list '}'
-                    | '(' type_name ')' '{' initializer_list',' '}'
-                    ;
-
-argument_expression_list:     assignment_expression
-                            | assignment_expression_list',' assignment_expression
-                            ;
-
-unary_expression:     postfix_expression
-                    | "++" unary_expression
-                    | "--" unary_expression
-                    | unary_operator cast_expression
-                    | SIZEOF unary_expression
-                    | SIZEOF '('  type_name ')'
-                    ;
-
-unary_operator: '&' | '*' | '+' | '-' | '~' | '!' ;
-
-cast_expression:      unary_operator
-                    | '(' type_name ')'
-                    ;
-
-multiplicative_expression:    cast_expression
-                            | multiplicative_expression '*' cast_expression
-                            | multiplicative_expression '/' cast_expression
-                            | multiplicative_expression '%' cast_expression
-                            ;
-
-additive_expression:      multiplicative_expression
-                        | additive_expression '+' multiplicative_expression
-                        | additive_expression '-' multiplicative_expression
-                        ;
-
-shift_expression:     additive_expression
-                    | shift_expression "<<" additive_expression
-                    | shift_expression ">>" additive_expression
-                    ;
-
-relational_expression:    shift_espression
-                        | relational_expression '<' shift_espression
-                        | relational_expression '>' shift_espression
-                        | relational_expression "<=" shift_espression
-                        | relational_expression ">=" shift_espression
-                        ;
-                        
-
-equality_expression:      relational_expression
-                        | equality_expression "==" relational_expression
-                        | equality_expression "!=" relational_expression
-                        ;
-
-AND_expression:   equality_expression
-                | AND_expression '&' equality_expression
+expAsignacion:   expCondicional
+                | expUnaria operAsignacion expAsignacion
                 ;
 
-exclusive_OR_expression:      AND_expression
-                            | exclusive_OR_expression '^' AND_expression
-                            ;
+operAsignacion: '=' | "+=" ;
 
-inclusive_OR_expression:      exclusive_OR_expression
-                            | inclusive_OR_expression '|' exclusive_OR_expression
-                            ;
-
-logical_AND_expression:   inclusive_OR_expression
-                        | logical_AND_expression "&&" inclusive_OR_expression
-                        ;
-
-logical_OR_expression:    logical_AND_expression
-                        | logical_OR_expression "||" logical_AND_expression
-                        ;
-
-conditional_expression:   logical_OR_expression
-                        | logical_OR_expression '?' expression ':' conditional_expression
-                        ;
-
-assignment_expression:    conditional_expression
-                        | unary_expression assignment_operator assignment_expression
-                        ;
-
-assignment_operator:   '=' | "*=" | "/=" | "%=" | "+="| "-=" 
-                        | "<<=" | ">>=" | "&=" | "^=" | "|="
-                        ;
-
-expression:   assignment_expression
-            | expression',' assignment_expression
-            ;
-
-constant_expression: conditional_expression ;
-
-declaration: declaration_specifiers init_declarator_list.opt ';' ;
-
-init_declarator_list.opt:     /* empty */
-                            | init_declarator_list
-                            ; 
-
-declaration_specifiers:   storage_class_specifier declaration_specifiers.opt
-                        | type_specifier declaration_specifiers.opt
-                        | type_qualifier declaration_specifiers.opt
-                        | function_specifier declaration_specifiers.opt
-                        ;
-
-declaration_specifiers.opt:   /* empty */
-                            | declaration_specifiers
-                            ;
-
-init_declarator_list:     init_declarator
-                        | init_declarator_list',' init_declarator
-                        ;
-
-init_declarator:      declarator
-                    | declarator '=' initializer
-                    ;
-
-storage_class_specifier: TYPEDEF | EXTERN | STATIC | AUTO | REGISTER ;
-
-type_specifier:   VOID | CHAR | SHORT | INT | LONG | FLOAT | DOUBLE | SIGNED | UNSIGNED | BOOL | COMPLEX
-                | struct_or_union_specifier
-                | enum_specifier
-                | typedef_name
+expCondicional:   expOr
+                | expOr '?' expresion ':' expCondicional
                 ;
 
-struct_or_union_specifier:    struct_or_union identifier '{' struct_declaration_list '}'
-                            | struct_or_union '{' struct_declaration_list '}'
-                            | struct_or_union identifier
-                            ;
-
-struct_or_union: STRUCT | UNION ;
-
-struct_declaration_list:      struct_declaration
-                            | struct_declaration_list struct_declaration
-                            ;
-
-struct_declaration:   speficier_qualifier_list struct_declarator_list ';' ;
-
-speficier_qualifier_list:     type_specifier speficier_qualifier_list.opt
-                            | type_qualifier speficier_qualifier_list.opt
-                            ;
-
-speficier_qualifier_list.opt:     /* empty */
-                                | speficier_qualifier_list
-                                ;
-
-struct_declarator_list:   struct_declarator
-                        | struct_declarator_list',' struct_declarator
-                        ;
-
-struct_declarator:    declarator
-                    | declarator.opt : constant_expression
-                    ;
-
-declarator.opt:   /* empty */
-                | declarator
-                ;
-
-enum_specifier:   ENUM identifier.opt '{' enumerator_list '}'
-                | ENUM identifier.opt '{' enumerator_list',' '}'
-                | ENUM identifier
-                ;
-
-identifier.opt:   /* empty */
-                | identifier
-                ;
-
-enumerator_list:      enumerator
-                    | enumerator_list',' enumerator
-                    ;
-
-enumerator:   enumeration_constant
-            | enumerator '=' constant_expression
-            ;
-
-type_qualifier: CONST | RESTRICT | VOLATILE ;
-
-function_specifier: INLINE ;
-
-declarator:   pointer direct_declarator
-            | direct_declarator
-            ;
-
-direct_declarator:    identifier
-                    | '(' declarator ')'
-                    | direct_declarator '[' type_qualifier_list.opt assignment_expression.opt ']'
-                    | direct_declarator '[' STATIC type_qualifier_list.opt assignment_expression ']'
-                    | direct_declarator '[' type_qualifier_list STATIC assignment_expression ']'
-                    | direct_declarator '[' type_qualifier_list.opt '*' ']'
-                    | direct_declarator '(' parameter_type_list ')'
-                    | direct_declarator (identifier_list.opt)
-                    ;
-
-assignment_expression.opt:    /* empty */
-                            | assignment_expression
-                            ;
-
-type_qualifier_list.opt:      /* empty */
-                            | type_qualifier_list
-                            ;
-
-type_qualifier_list.opt:      /* empty */
-                            | assignment_expression
-                            ;
-
-identifier_list.opt:      /* empty */
-                        | type_qualifier_list
-                        ;
-
-pointer:      '*' type_qualifier_list.opt
-            | '*' type_qualifier_list.opt pointer
-            ;
-
-type_qualifier_list:      type_qualifier
-                        | type_qualifier_list type_qualifier
-                        ;
-
-parameter_type_list:      parameter_list
-                        | parameter_type_list ',' VARIARG
-                        ;
-
-parameter_list:   parameter_declaration
-                | parameter_list ',' parameter_declaration
-                ;
-
-parameter_declaration:    declaration_specifiers declarator
-                        | declaration_specifiers abstract_declarator
-                        | declaration_specifiers
-                        ;
-
-identifier_list:      identifier
-                    | identifier_list ',' identifier
-                    ;
-
-type_name:    speficier_qualifier_list
-            | speficier_qualifier_list abstract_declarator
-            ;
-
-abstract_declarator:      pointer
-                        | pointer direct_abstract_declarator
-                        | direct_abstract_declarator
-                        ;
-
-direct_abstract_declarator:   '(' abstract_declarator ')'
-                            | direct_abstract_declarator.opt '['  assignment_expression.opt ']'
-                            | direct_abstract_declarator.opt '[' '*' ']'
-                            | direct_abstract_declarator.opt '(' parameter_type_list ')'
-                            | direct_abstract_declarator.opt '(' ')'
-                            ;
-
-typedef_name: identifier ;
-
-initializer:      assignment_expression
-                | '{' initializer_list '}'
-                | '{' initializer_list ',' '}'
-                ;
-                
-initializer_list:     designation.opt initializer
-                    | initializer_list ',' designation.opt initializer
-                    ;
-
-designation:      designator_list '=';
-
-designator_list:      designator
-                    | designator_list designator_list
-                    ;
-
-designator:   '[' constant_expression ']'
-            | '.' identifier
-
-
-statement:    labeled_statement
-            | compound_statement
-            | expression_statement
-            | selection_statement
-            | iteration_statement
-            | jump_statement
-            ;
-
-labeled_statement:    identifier ':' statement
-                    | CASE constant_expression ':' statement
-                    | DEFAULT ':' statement
-                    ;
-
-compound_statement: '{' block_item_list.opt '}' ;
-
-block_item_list.opt:      /* empty */
-                        | block_item_list
-                        ;
-
-block_item_list:      block_item
-                    | block_item_list block_item
-                    ;
-
-block_item:   declaration
-            | statement
-            ;
-
-expression_statement: expression.opt ';' ;
-
-expression.opt:   /* empty */
-                | expression
-                ;
-
-selection_statement:      IF '(' expression ')' statement else_block.opt
-                        | SWITCH '(' expression ')' statement
-                        ;
-
-else_block.opt:   /* empty */
-                | ELSE statement
-                ;
-
-iteration_statement:      WHILE '(' expression ')' statement
-                        | DO statement WHILE '(' expression ')' ';'
-                        | FOR '(' expression.opt ';' expression.opt ';' expression.opt ')' statement
-                        | FOR '(' declaration expression.opt ';' expression.opt ')' statement
-                        ;
-
-jump_statement:   GOTO identifier ';'
-                | CONTINUE ';'
-                | BREAK ';'
-                | RETURN expression.opt ';'
-                ;
-
-translation_unit:     external_declaration
-                    | translation_unit external_declaration
-                    ;
-
-external_declaration:     function_definition
-                        | declaration
-                        ;
-
-function_definition:      declaration_specifiers declarator declaration_list.opt compound_statement ;
-
-declaration_list.opt:     /* empty */
-                        | declaration_list
-                        ;
-
-declaration_list:     declaration
-                    | declaration_list declaration
-                    ;
-
-preprocessing_file:   /* empty */
-                    | group
-                    ;
-
-group:    group_part
-        | group group_part
+expOr:    expAnd
+        | expOr "||" expAnd
         ;
 
-group_part:   if_section
-            | control_line
-            | text_line
-            | '#' non_directive
-            ;
+expAnd:   expIgualdad
+        | expAnd "&&" expIgualdad
+        ;
 
-if_section: if_group elif_groups.opt else_group.opt endif_line ;
+expIgualdad:      expRelacional
+                | expIgualdad operIgualdad expRelacional
+                ;
 
-elif_groups.opt:      /* empty */
-                    | elif_groups
+operIgualdad: "==" | "!=" ;
+
+expRelacional:    expAditiva
+                | expRelacional operRelacional expAditiva
+                ;
+
+operRelacional: '<' | "<=" ;
+
+expAditiva:       expMultiplicativa
+                | expAditiva '+' expMultiplicativa
+                ;
+
+expMultiplicativa:    expUnaria
+                    | expMultiplicativa '*' expUnaria
                     ;
 
-else_group.opt:   /* empty */
-                | else_group
-                ;
-
-/*
-* Agregar
-*   IF
-*   IFDEF
-*   IFNDEF
-*   ELIF
-*   ELSE
-*   ENDIF
-*/
-
-if_group:     '#' IF constant_expression new_line group.opt
-            | '#' IFDEF identifier new_line group.opt
-            | '#' IFNDEF identifier new_line group.opt
+expUnaria:    expPostfijo
+            | "++" expUnaria
+            | operUnario expUnaria
+            | SIZEOF '(' nombreTipo ')'
             ;
 
-elif_groups:      elif_group
-                | elif_groups elif_group
+operUnario: '&' | '*' | '-' | '!' ;
+
+expPostfijo:      expPrimaria
+                | expPostfijo '[' expresion ']'
+                | expPostfijo '(' listaArgumentos.opt ')'
+
+listaArgumentos.opt:      /* empty */
+                        | listaArgumentos
+                        ;
+
+listaArgumentos:      expAsignacion
+                    | listaArgumentos ',' expAsignacion
+                    ;
+
+expPrimaria:      identificador
+                | constante
+                | '(' expresion ')'
                 ;
 
-elif_group:   '#' ELIF constant_expression new_line group.opt;
+nombreTipo: CHAR | INT | DOUBLE ;
 
-else_group:   '#' ELSE new_line group.opt;
+declaVarSimples: nombreTipo listaVarSimples ';' ;
 
-endif_line:   '#' ENDIF new_line;
+listaVarSimples:      unaVarSimple
+                    | listaVarSimples ',' unaVarSimple 
+                    ;
 
-control_line: '#' directive;
+unaVarSimple: variable '=' inicial.opt ;
 
-directive:    define_directive
-            | INCLUDE pp_tokens
-            | UNDEF identifier new_line
-            | LINE pp_tokens new_line
-            | ERROR pp_tokens.opt new_line
-            | PRAGMA pp_tokens.opt new_line
-            | new_line
+variable: identificador ;
+
+inicial.opt:      /* empty */
+                | inicial
+                ;
+
+inicial: '=' constante ;
+
+sentencia:    sentCompuesta
+            | sentExpresion
+            | sentSeleccion
+            | sentIteracion
+            | sentSalto
             ;
 
-pp_tokens.opt:    /* empty */
-                | pp_tokens
+sentCompuesta:    '{' listaDeclaraciones.opt listaSentencias.opt '}'
+
+listaDeclaraciones.opt:   /* empty */
+                        | listaDeclaraciones
+                        ;
+
+listaSentencias.opt:      /* empty */
+                        | listaSentencias
+                        ;
+
+listaDeclaraciones:   declaracion
+                    | listaDeclaraciones declaracion
+                    ;
+
+listaSentencias:      sentencia
+                    | listaSentencias sentencia
+                    ;
+
+sentExpresion: expresion.opt ;
+
+expresion.opt:    /* empty */
+                | expresion
                 ;
+
+sentSeleccion:    IF '(' expresion ')' sentencia else.opt
+                ;
+
+else.opt:     /* empty */
+            | ELSE sentencia
+            ;
+
+sentIteracion:    WHILE '(' expresion ')' sentencia
+                | DO sentencia WHILE '(' expresion ')' ';'
+                | for '(' expresion.opt ';' expresion.opt ';' expresion.opt ')' sentencia
+                ;
+
+sentSalto:  RETURN expresion.opt ';' ;
