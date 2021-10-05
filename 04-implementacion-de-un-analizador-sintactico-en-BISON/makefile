@@ -6,7 +6,7 @@ ODIR=./obj
 SRCDIR=./src
 LEXDIR=./lex
 BISDIR=./bison
-LIBS=-lfl -ly -lcommons
+LIBS=-lfl -ly 
 CC=gcc
 CFLAGS=-I$(IDIR) -I$(COMMONS_IDIR) -L$(COMMONS_LDIR) -g -Wall
 
@@ -15,7 +15,7 @@ COMMONS_DEPS = $(wildcard $(COMMONS_IDIR)/*.h)
 SRC = $(wildcard $(SRCDIR)/*.c)
 OBJ = $(patsubst $(SRCDIR)/%.c,$(ODIR)/%.o,$(SRC))
 
-$(PROCESS_NAME): $(OBJ) $(ODIR)/lexer.o
+$(PROCESS_NAME): $(OBJ) $(ODIR)/parser.o $(ODIR)/lexer.o 
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 $(ODIR)/%.o: $(SRCDIR)/%.c $(DEPS) $(COMMONS_DEPS) | $(ODIR)
@@ -33,4 +33,4 @@ $(ODIR):
 .PHONY: clean
 
 clean:
-	rm -f $(ODIR)/*.o $(SRCDIR)/TP3.c $(PROCESS_NAME) yyout.txt
+	rm -f $(ODIR)/*.o $(SRCDIR)/lexer.c $(PROCESS_NAME) yyout.txt

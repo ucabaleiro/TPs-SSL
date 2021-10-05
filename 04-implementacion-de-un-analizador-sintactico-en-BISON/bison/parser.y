@@ -1,17 +1,25 @@
 %{
-    #include <stdio.h>
-    int yylex(void);
-    int yyerror(const char *s);
-    extern FILE* yyin;
-    extern int yylineno;
+#include <stdio.h>
+int yylex(void);
+int yyerror(const char *s);
+extern FILE* yyin;
+extern int yylineno;
+int analisisCorrecto = 1;
+
 %}
+
+%debug
+%error-verbose
+
+%code requires
+{
+    typedef enum types { t_char, t_uchar, t_sint, t_usint, t_int, t_uint, t_long, t_ulong, t_llong, t_ullong, t_float, t_double, t_ldouble, t_ptr } types;
+}
 
 %union
 {
     char* strval;
-    char cval;
-    int ival;
-    double dval;
+    types tval;
 }
 
 %token AUTO
@@ -35,9 +43,10 @@
 %token LONG
 %token REGISTER
 %token RESTRICT
+%token RETURN
 %token SHORT
 %token SIGNED
-%token SIZOF
+%token SIZEOF
 %token STATIC
 %token STRUCT
 %token SWITCH
@@ -49,7 +58,6 @@
 %token WHILE
 %token BOOL
 %token COMPLEX
-%token IMAGINARY
 %token FLECHA "->"
 %token MASMAS "++"
 %token MENOSMENOS "--"
@@ -72,26 +80,17 @@
 %token ASIGN_BITWISE_AND "&="
 %token ASIGN_BITWISE_XOR "^="
 %token ASIGN_BITWISE_OR "|="
-%token HASHHASH "##"
-%token ALT_CORCHETE_APERTURA "<:"
-%token ALT_CORCHETE_CIERRE ":>"
-%token ALT_LLAVE_APERTURA "<%"
-%token ALT_LLAVE_CIERRE "%>"
-%token ALT_HASH "%:"
-%token ALT_HASHHASH "%:%:"
 
 %token <strval> IDENTIFIER
-%token <cval>   CHAR_CONST
-%token <intval> INT_CONST
-%token <dval>   REAL_CONST
-%token <strval> STRING_LITERAL
+%token <tval> CHAR_CONST
+%token <tval> INT_CONST
+%token <tval> REAL_CONST
+%token <tval> STRING_LITERAL
 
-%token IFDEF
-%token IFNDEF
-%token ELIF
-%token ENDIF
+%nonassoc IFX
+%nonassoc ELSE
 
-%start primary_expression
+%start translation_unit
 
 %%
 
@@ -104,7 +103,7 @@ constant:     CHAR_CONST
 
 string_literal: STRING_LITERAL ;
 
-enumeration_constant: identifier ; /* TODO: refacherizar todas las otras constantes */
+enumeration_constant: identifier ;
 
 primary_expression:   identifier
                     | constant
@@ -124,7 +123,7 @@ postfix_expression:   primary_expression
                     ;
 
 argument_expression_list:     assignment_expression
-                            | assignment_expression_list',' assignment_expression
+                            | argument_expression_list',' assignment_expression
                             ;
 
 unary_expression:     postfix_expression
@@ -137,8 +136,8 @@ unary_expression:     postfix_expression
 
 unary_operator: '&' | '*' | '+' | '-' | '~' | '!' ;
 
-cast_expression:      unary_operator
-                    | '(' type_name ')'
+cast_expression:      unary_expression
+                    | '(' type_name ')' cast_expression
                     ;
 
 multiplicative_expression:    cast_expression
@@ -157,11 +156,11 @@ shift_expression:     additive_expression
                     | shift_expression ">>" additive_expression
                     ;
 
-relational_expression:    shift_espression
-                        | relational_expression '<' shift_espression
-                        | relational_expression '>' shift_espression
-                        | relational_expression "<=" shift_espression
-                        | relational_expression ">=" shift_espression
+relational_expression:    shift_expression
+                        | relational_expression '<' shift_expression
+                        | relational_expression '>' shift_expression
+                        | relational_expression "<=" shift_expression
+                        | relational_expression ">=" shift_expression
                         ;
                         
 
@@ -266,7 +265,7 @@ struct_declarator_list:   struct_declarator
                         ;
 
 struct_declarator:    declarator
-                    | declarator.opt : constant_expression
+                    | declarator.opt ':' constant_expression
                     ;
 
 declarator.opt:   /* empty */
@@ -305,7 +304,7 @@ direct_declarator:    identifier
                     | direct_declarator '[' type_qualifier_list STATIC assignment_expression ']'
                     | direct_declarator '[' type_qualifier_list.opt '*' ']'
                     | direct_declarator '(' parameter_type_list ')'
-                    | direct_declarator (identifier_list.opt)
+                    | direct_declarator '(' identifier_list.opt ')'
                     ;
 
 assignment_expression.opt:    /* empty */
@@ -316,12 +315,8 @@ type_qualifier_list.opt:      /* empty */
                             | type_qualifier_list
                             ;
 
-type_qualifier_list.opt:      /* empty */
-                            | assignment_expression
-                            ;
-
 identifier_list.opt:      /* empty */
-                        | type_qualifier_list
+                        | identifier_list
                         ;
 
 pointer:      '*' type_qualifier_list.opt
@@ -333,7 +328,7 @@ type_qualifier_list:      type_qualifier
                         ;
 
 parameter_type_list:      parameter_list
-                        | parameter_type_list ',' VARIARG
+                        | parameter_list ',' "..."
                         ;
 
 parameter_list:   parameter_declaration
@@ -341,9 +336,12 @@ parameter_list:   parameter_declaration
                 ;
 
 parameter_declaration:    declaration_specifiers declarator
-                        | declaration_specifiers abstract_declarator
-                        | declaration_specifiers
+                        | declaration_specifiers abstract_declarator.opt
                         ;
+
+abstract_declarator.opt:      /* empty */
+                            | abstract_declarator
+                            ;
 
 identifier_list:      identifier
                     | identifier_list ',' identifier
@@ -359,13 +357,17 @@ abstract_declarator:      pointer
                         ;
 
 direct_abstract_declarator:   '(' abstract_declarator ')'
-                            | direct_abstract_declarator.opt '['  assignment_expression.opt ']'
-                            | direct_abstract_declarator.opt '[' '*' ']'
-                            | direct_abstract_declarator.opt '(' parameter_type_list ')'
-                            | direct_abstract_declarator.opt '(' ')'
+                            | '['  assignment_expression.opt ']'
+                            | '[' '*' ']'
+                            | '(' parameter_type_list ')'
+                            | '(' ')'
+                            | direct_abstract_declarator '['  assignment_expression.opt ']'
+                            | direct_abstract_declarator '[' '*' ']'
+                            | direct_abstract_declarator '(' parameter_type_list ')'
+                            | direct_abstract_declarator '(' ')'
                             ;
 
-typedef_name: identifier ;
+typedef_name: 't' /* Typedefs simplificados para evitar hacer un lexer hack */ ;
 
 initializer:      assignment_expression
                 | '{' initializer_list '}'
@@ -376,10 +378,14 @@ initializer_list:     designation.opt initializer
                     | initializer_list ',' designation.opt initializer
                     ;
 
-designation:      designator_list '=';
+designation.opt:      /* empty */
+                    | designation
+                    ;
+
+designation:    designator_list '=';
 
 designator_list:      designator
-                    | designator_list designator_list
+                    | designator_list designator
                     ;
 
 designator:   '[' constant_expression ']'
@@ -419,13 +425,10 @@ expression.opt:   /* empty */
                 | expression
                 ;
 
-selection_statement:      IF '(' expression ')' statement else_block.opt
+selection_statement:      IF '(' expression ')' statement %prec IFX
+                        | IF '(' expression ')' statement ELSE statement
                         | SWITCH '(' expression ')' statement
                         ;
-
-else_block.opt:   /* empty */
-                | ELSE statement
-                ;
 
 iteration_statement:      WHILE '(' expression ')' statement
                         | DO statement WHILE '(' expression ')' ';'
@@ -436,7 +439,7 @@ iteration_statement:      WHILE '(' expression ')' statement
 jump_statement:   GOTO identifier ';'
                 | CONTINUE ';'
                 | BREAK ';'
-                | RETURN expression.opt ';'
+                | RETURN expression ';'
                 ;
 
 translation_unit:     external_declaration
@@ -457,66 +460,23 @@ declaration_list:     declaration
                     | declaration_list declaration
                     ;
 
-preprocessing_file:   /* empty */
-                    | group
-                    ;
+%%
 
-group:    group_part
-        | group group_part
-        ;
+int main(int argc, char *argv[]) {
+    yydebug = 0;
+	yyin=fopen(argv[1],"r");
+   	yyparse();
+	fclose(yyin);
 
-group_part:   if_section
-            | control_line
-            | text_line
-            | '#' non_directive
-            ;
+	if(analisisCorrecto)
+        printf("\nAnalisis finalizado correctamente\n\n\n");
 
-if_section: if_group elif_groups.opt else_group.opt endif_line ;
 
-elif_groups.opt:      /* empty */
-                    | elif_groups
-                    ;
+    return 0; 
+}
 
-else_group.opt:   /* empty */
-                | else_group
-                ;
-
-/*
-* Agregar
-*   IF
-*   IFDEF
-*   IFNDEF
-*   ELIF
-*   ELSE
-*   ENDIF
-*/
-
-if_group:     '#' IF constant_expression new_line group.opt
-            | '#' IFDEF identifier new_line group.opt
-            | '#' IFNDEF identifier new_line group.opt
-            ;
-
-elif_groups:      elif_group
-                | elif_groups elif_group
-                ;
-
-elif_group:   '#' ELIF constant_expression new_line group.opt;
-
-else_group:   '#' ELSE new_line group.opt;
-
-endif_line:   '#' ENDIF new_line;
-
-control_line: '#' directive;
-
-directive:    define_directive
-            | INCLUDE pp_tokens
-            | UNDEF identifier new_line
-            | LINE pp_tokens new_line
-            | ERROR pp_tokens.opt new_line
-            | PRAGMA pp_tokens.opt new_line
-            | new_line
-            ;
-
-pp_tokens.opt:    /* empty */
-                | pp_tokens
-                ;
+int yyerror(const char *msg) {
+	printf("\nFallo el analisis en la linea: %d %s\n\n\n",yylineno,msg);
+	analisisCorrecto = 0;
+	return 0; 
+}

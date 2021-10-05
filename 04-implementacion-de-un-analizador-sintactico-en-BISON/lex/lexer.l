@@ -2,6 +2,10 @@
 %option warn
 
 %{
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "parser.h"
 
 extern FILE* yyin;
@@ -37,7 +41,7 @@ exponente_dec               [eE]{exponente}
 exponente_hex               [pP]{exponente}
 exponente                   [\+\-]?{digit}+
 
-const_char                  L?[']{c_char}+[']
+const_char                  L?[']{c_char}[']
 c_char                      [^\'\\\n]|{escape}
 
 literal_cadena              L?\"{s_char}*\"
@@ -50,14 +54,6 @@ escape_hex                  \\x{hexdigit}+
 
 comentario_sl               "//".*
 comentario_ml               "/*"([^*]|(\*+[^*/]))*"*"+"/"
-
-directiva                   {directiva_include}|{directiva_define}
-directiva_include           [ \t]*#include([ \t]+{pre_token})+[ \t]*\n
-directiva_define            [ \t]*#define[ \t]+{identificador}([ \t]*"("[ \t]*({lista_id}|...|{lista_id}[ \t]*,[ \t]*...)?[ \t]*")")?([ \t]+{pre_token})*[ \t]*\n
-lista_id                    {identificador}(,{identificador})*
-pre_token                   {header}|{identificador}|{pre_number}|{const_char}|{literal_cadena}|{puntuador}
-header                      \<[^\>\n]+\>|\"[^\"\n]+\"
-pre_number                  "."?{digit}("."|{digit}|{identificador_nondigit}|[eEpP][\+\-])*
 
 %%
 
@@ -82,9 +78,10 @@ pre_number                  "."?{digit}("."|{digit}|{identificador_nondigit}|[eE
 "long"                      {return LONG;}
 "register"                  {return REGISTER;}
 "restrict"                  {return RESTRICT;}
+"return"                    {return RETURN;}
 "short"                     {return SHORT;}
 "signed"                    {return SIGNED;}
-"sizeof"                    {return SIZOF;}
+"sizeof"                    {return SIZEOF;}
 "static"                    {return STATIC;}
 "struct"                    {return STRUCT;}
 "switch"                    {return SWITCH;}
@@ -96,7 +93,6 @@ pre_number                  "."?{digit}("."|{digit}|{identificador_nondigit}|[eE
 "while"                     {return WHILE;}
 "_Bool"                     {return BOOL;}
 "_Complex"                  {return COMPLEX;}
-"_Imaginary"                {return IMAGINARY;}
 
 "["                         {return '[';}
 "]"                         {return ']';}
@@ -145,19 +141,23 @@ pre_number                  "."?{digit}("."|{digit}|{identificador_nondigit}|[eE
 "|="                        {return ASIGN_BITWISE_OR;}
 ","                         {return ',';}
 "#"                         {return '#';}
-"##"                        {return HASHHASH;}
-"<:"                        {return ALT_CORCHETE_APERTURA;}
-":>"                        {return ALT_CORCHETE_CIERRE;}
-"<%"                        {return ALT_LLAVE_APERTURA;}
-"%>"                        {return ALT_LLAVE_CIERRE;}
-"%:"                        {return ALT_HASH;}
-"%:%:"                      {return ALT_HASHHASH;}
 
-"ifdef"                     {return IFDEF;}
-"ifndef"                    {return IFNDEF;}
-"elif"                      {return ELIF;}
-"endif"                     {return ENDIF;}
+"t"                         {return 't';}
 
-{identificador}             {yylval.strval = yytext; return IDENFI}
+{identificador}             {yylval.strval = strdup(yytext); return IDENTIFIER;}
+{const_char}                {yylval.tval = t_char; return CHAR_CONST;}
+{const_entero}              {yylval.tval = t_llong; return INT_CONST;}
+{const_float}               {yylval.tval = t_ldouble; return REAL_CONST;}
+{literal_cadena}            {yylval.tval = t_ptr; return STRING_LITERAL;}
+[\t \n]                     {}
+{comentario_sl}             {}
+{comentario_ml}             {}
+
+
 
 %%
+
+int yywrap(void)
+{
+    return 1;
+}
