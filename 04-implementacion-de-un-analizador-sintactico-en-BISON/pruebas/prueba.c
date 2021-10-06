@@ -1,3 +1,5 @@
+int sumar(int a, int b, int *c);
+
 int main()
 {
     int a = 5;
@@ -13,5 +15,17 @@ int main()
     while(a < 0){
         a++;
     }
-    return 10;
+
+    int A = 5;
+    int B = 10;
+    int resultado;
+
+    int ok = sumar(A, B, &resultado);
+
+    return 0;
+}
+
+int sumar(int a, int b, int *c){
+    *c = a+b;
+    return 1;
 }

@@ -1,4 +1,7 @@
 %{
+
+/* Typedefs simplificados para evitar hacer un lexer hack, usa letra 't' */
+
 #include <stdio.h>
 int yylex(void);
 int yyerror(const char *s);
@@ -197,7 +200,7 @@ assignment_expression:    conditional_expression
                         | unary_expression assignment_operator assignment_expression
                         ;
 
-assignment_operator:   '=' | "*=" | "/=" | "%=" | "+="| "-=" 
+assignment_operator:      '=' | "*=" | "/=" | "%=" | "+="| "-=" 
                         | "<<=" | ">>=" | "&=" | "^=" | "|="
                         ;
 
@@ -209,10 +212,6 @@ constant_expression: conditional_expression ;
 
 declaration: declaration_specifiers init_declarator_list.opt ';' ;
 
-init_declarator_list.opt:     /* empty */
-                            | init_declarator_list
-                            ; 
-
 declaration_specifiers:   storage_class_specifier declaration_specifiers.opt
                         | type_specifier declaration_specifiers.opt
                         | type_qualifier declaration_specifiers.opt
@@ -222,6 +221,10 @@ declaration_specifiers:   storage_class_specifier declaration_specifiers.opt
 declaration_specifiers.opt:   /* empty */
                             | declaration_specifiers
                             ;
+
+init_declarator_list.opt:     /* empty */
+                            | init_declarator_list
+                            ; 
 
 init_declarator_list:     init_declarator
                         | init_declarator_list',' init_declarator
@@ -297,7 +300,7 @@ declarator:   pointer direct_declarator
             | direct_declarator
             ;
 
-direct_declarator:    identifier
+direct_declarator:    identifier 
                     | '(' declarator ')'
                     | direct_declarator '[' type_qualifier_list.opt assignment_expression.opt ']'
                     | direct_declarator '[' STATIC type_qualifier_list.opt assignment_expression ']'
