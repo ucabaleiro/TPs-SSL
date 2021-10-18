@@ -1,12 +1,12 @@
-PROCESS_NAME=TP4
+PROCESS_NAME=../TP4
 IDIR =./include
-COMMONS_IDIR = ../so-commons-library/include
-COMMONS_LDIR = ../so-commons-library/lib
+COMMONS_IDIR = ./so-commons-library/include
+COMMONS_LDIR = ./so-commons-library/lib
 ODIR=./obj
 SRCDIR=./src
 LEXDIR=./lex
 BISDIR=./bison
-LIBS=-lfl -ly 
+LIBS=-lfl -ly -lcommons
 CC=gcc
 CFLAGS=-I$(IDIR) -I$(COMMONS_IDIR) -L$(COMMONS_LDIR) -g -Wall
 

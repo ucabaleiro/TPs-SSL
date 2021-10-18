@@ -153,7 +153,7 @@ comentario_ml               "/*"([^*]|(\*+[^*/]))*"*"+"/"
 {comentario_sl}             {}
 {comentario_ml}             {}
 
-//TODO: Matchear no reconocidos
+.                           {printf("Linea %i: Error Lexico \"%s\"\n", yylineno, yytext);}
 
 %%
 

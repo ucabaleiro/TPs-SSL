@@ -3,6 +3,8 @@
 /* Typedefs simplificados para evitar hacer un lexer hack, usa letra 't' */
 
 #include <stdio.h>
+#include <stringso.h>
+#include <list.h>
 int yylex(void);
 int yyerror(const char *s);
 extern FILE* yyin;
@@ -16,6 +18,7 @@ int analisisCorrecto = 1;
 
 %code requires
 {
+    #include <list.h>
     typedef enum types { t_char, t_uchar, t_sint, t_usint, t_int, t_uint, t_long, t_ulong, t_llong, t_ullong, t_float, t_double, t_ldouble, t_ptr } types;
 }
 
@@ -23,6 +26,8 @@ int analisisCorrecto = 1;
 {
     char* strval;
     types tval;
+    int intval;
+    t_list* list;
 }
 
 %token AUTO
@@ -90,6 +95,10 @@ int analisisCorrecto = 1;
 %token <tval> REAL_CONST
 %token <tval> STRING_LITERAL
 
+%nterm <strval> identifier
+%nterm <tval> constant
+%nterm <tval> string_literal
+
 %nonassoc IFX
 %nonassoc ELSE
 
@@ -97,7 +106,7 @@ int analisisCorrecto = 1;
 
 %%
 
-identifier: IDENTIFIER ;
+identifier: IDENTIFIER {$$ = $1;} ;
 
 constant:     CHAR_CONST
             | INT_CONST
@@ -210,57 +219,82 @@ expression:   assignment_expression
 
 constant_expression: conditional_expression ;
 
-declaration: declaration_specifiers init_declarator_list.opt ';' ;
-
-declaration_specifiers:   storage_class_specifier declaration_specifiers.opt
-                        | type_specifier declaration_specifiers.opt
-                        | type_qualifier declaration_specifiers.opt
-                        | function_specifier declaration_specifiers.opt
-                        ;
-
-declaration_specifiers.opt:   /* empty */
-                            | declaration_specifiers
-                            ;
-
-init_declarator_list.opt:     /* empty */
-                            | init_declarator_list
-                            ; 
-
-init_declarator_list:     init_declarator
-                        | init_declarator_list',' init_declarator
-                        ;
-
-init_declarator:      declarator
-                    | declarator '=' initializer
-                    ;
-
-storage_class_specifier: TYPEDEF | EXTERN | STATIC | AUTO | REGISTER ;
-
-type_specifier:   VOID | CHAR | SHORT | INT | LONG | FLOAT | DOUBLE | SIGNED | UNSIGNED | BOOL | COMPLEX
-                | struct_or_union_specifier
-                | enum_specifier
-                | typedef_name
+declaration:      declaration_specifiers init_declarator_list.opt ';' 
+                {
+                    void printearDeclaracion(void* elem){
+                        printf("Linea %i: Declaracion - %s%s\n", yylineno, $<strval>1, (char*)elem);
+                    }
+                    list_iterate($<list>2, printearDeclaracion);
+                    list_destroy_and_destroy_elements($<list>2, free);
+                    free($<strval>1);
+                }
+                | error ';'             { yyerrok; }
                 ;
 
-struct_or_union_specifier:    struct_or_union identifier '{' struct_declaration_list '}'
-                            | struct_or_union '{' struct_declaration_list '}'
-                            | struct_or_union identifier
+declaration_specifiers:   storage_class_specifier declaration_specifiers.opt {$<strval>$ = string_from_format("%s%s", $<strval>1, $<strval>2);}
+                        | type_specifier declaration_specifiers.opt {$<strval>$ = string_from_format("%s%s", $<strval>1, $<strval>2);}
+                        | type_qualifier declaration_specifiers.opt {$<strval>$ = string_from_format("%s%s", $<strval>1, $<strval>2);}
+                        | function_specifier declaration_specifiers.opt {$<strval>$ = string_from_format("%s%s", $<strval>1, $<strval>2);}
+                        ;
+
+declaration_specifiers.opt:   /* empty */ {$<strval>$ = "";}
+                            | declaration_specifiers {$<strval>$ = $<strval>1;}
                             ;
 
-struct_or_union: STRUCT | UNION ;
+init_declarator_list.opt:     /* empty */ {$<list>$ = list_create();}
+                            | init_declarator_list {$<list>$ = $<list>1;}
+                            ; 
+
+init_declarator_list:     init_declarator {$<list>$ = list_create(); list_add($<list>$, $<strval>1);}
+                        | init_declarator_list',' init_declarator {$<list>$ = $<list>1; list_add($<list>$, $<strval>3);}
+                        ;
+
+init_declarator:      declarator {$<strval>$ = $<strval>1;}
+                    | declarator '=' initializer {$<strval>$ = $<strval>1;}
+                    ;
+
+storage_class_specifier:      TYPEDEF  {$<strval>$ = "typedef ";}
+                            | EXTERN   {$<strval>$ = "extern ";}
+                            | STATIC   {$<strval>$ = "static ";}
+                            | AUTO     {$<strval>$ = "auto ";}
+                            | REGISTER {$<strval>$ = "register ";}
+                            ;
+
+type_specifier:   VOID {$<strval>$ = "void ";} 
+                | CHAR {$<strval>$ = "char ";}
+                | SHORT {$<strval>$ = "short ";} 
+                | INT {$<strval>$ = "int ";}
+                | LONG {$<strval>$ = "long ";}
+                | FLOAT {$<strval>$ = "float ";}
+                | DOUBLE {$<strval>$ = "double ";}
+                | SIGNED {$<strval>$ = "signed ";}
+                | UNSIGNED {$<strval>$ = "unsigned ";}
+                | BOOL {$<strval>$ = "bool ";}
+                | COMPLEX {$<strval>$ = "complex ";}
+                | struct_or_union_specifier {$<strval>$ = $<strval>1;}
+                | enum_specifier {$<strval>$ = $<strval>1;}
+                | typedef_name {$<strval>$ = "t ";}
+                ;
+
+struct_or_union_specifier:    struct_or_union identifier '{' struct_declaration_list '}' { $<strval>$ = string_from_format("%s%s ", $<strval>1, $2);}
+                            | struct_or_union '{' struct_declaration_list '}' { $<strval>$ = string_from_format("%s anonimo ", $<strval>1);}
+                            | struct_or_union identifier { $<strval>$ = string_from_format("%s%s ", $<strval>1, $2);}
+                            ;
+
+struct_or_union: STRUCT {$<strval>$ = "struct ";} | UNION {$<strval>$ = "union ";} ;
 
 struct_declaration_list:      struct_declaration
                             | struct_declaration_list struct_declaration
                             ;
 
-struct_declaration:   speficier_qualifier_list struct_declarator_list ';' ;
+struct_declaration:   specifier_qualifier_list struct_declarator_list ';' ;
 
-speficier_qualifier_list:     type_specifier speficier_qualifier_list.opt
-                            | type_qualifier speficier_qualifier_list.opt
+specifier_qualifier_list:     type_specifier specifier_qualifier_list.opt
+                            | type_qualifier specifier_qualifier_list.opt
                             ;
 
-speficier_qualifier_list.opt:     /* empty */
-                                | speficier_qualifier_list
+specifier_qualifier_list.opt:     /* empty */
+                                | specifier_qualifier_list
                                 ;
 
 struct_declarator_list:   struct_declarator
@@ -275,13 +309,13 @@ declarator.opt:   /* empty */
                 | declarator
                 ;
 
-enum_specifier:   ENUM identifier.opt '{' enumerator_list '}'
-                | ENUM identifier.opt '{' enumerator_list',' '}'
-                | ENUM identifier
+enum_specifier:   ENUM identifier.opt '{' enumerator_list '}' { $<strval>$ = string_from_format("enum %s ", $<strval>2);}
+                | ENUM identifier.opt '{' enumerator_list',' '}' { $<strval>$ = string_from_format("enum %s ", $<strval>2);}
+                | ENUM identifier { $<strval>$ = string_from_format("enum %s ", $2);}
                 ;
 
-identifier.opt:   /* empty */
-                | identifier
+identifier.opt:   /* empty */ {$<strval>$ = "anonimo";}
+                | identifier  {$<strval>$ = $1;}
                 ;
 
 enumerator_list:      enumerator
@@ -292,24 +326,27 @@ enumerator:   enumeration_constant
             | enumerator '=' constant_expression
             ;
 
-type_qualifier: CONST | RESTRICT | VOLATILE ;
+type_qualifier:   CONST {$<strval>$ = "const ";}
+                | RESTRICT {$<strval>$ = "restrict ";}
+                | VOLATILE {$<strval>$ = "volatile ";}
+                ;
 
-function_specifier: INLINE ;
+function_specifier: INLINE {$<strval>$ = "inline ";} ;
 
-declarator:   pointer direct_declarator
-            | direct_declarator
+declarator:   pointer direct_declarator {string_append(&$<strval>1, $<strval>2); $<strval>$ = $<strval>1;}
+            | direct_declarator {$<strval>$ = string_duplicate($<strval>1);}
             ;
 
-direct_declarator:    identifier 
-                    | '(' declarator ')'
-                    | direct_declarator '[' type_qualifier_list.opt assignment_expression.opt ']'
-                    | direct_declarator '[' STATIC type_qualifier_list.opt assignment_expression ']'
-                    | direct_declarator '[' type_qualifier_list STATIC assignment_expression ']'
-                    | direct_declarator '[' type_qualifier_list.opt '*' ']'
-                    | direct_declarator '(' parameter_type_list ')'
-                    | direct_declarator '(' identifier_list.opt ')'
+direct_declarator:    identifier {$<strval>$ = string_duplicate($1);}
+                    | '(' declarator ')' {$<strval>$ = string_from_format("(%s)", $<strval>2);}
+                    | direct_declarator '[' type_qualifier_list.opt assignment_expression.opt ']' {string_append(&$<strval>1, "[]"); $<strval>$ = $<strval>1;}
+                    | direct_declarator '[' STATIC type_qualifier_list.opt assignment_expression ']' {string_append(&$<strval>1, "[]"); $<strval>$ = $<strval>1;}
+                    | direct_declarator '[' type_qualifier_list STATIC assignment_expression ']' {string_append(&$<strval>1, "[]"); $<strval>$ = $<strval>1;}
+                    | direct_declarator '[' type_qualifier_list.opt '*' ']' {string_append(&$<strval>1, "[]"); $<strval>$ = $<strval>1;}
+                    | direct_declarator '(' parameter_type_list ')' {string_append(&$<strval>1, "()"); $<strval>$ = $<strval>1;}
+                    | direct_declarator '(' identifier_list.opt ')' {string_append(&$<strval>1, "()"); $<strval>$ = $<strval>1;}
                     ;
-
+                        
 assignment_expression.opt:    /* empty */
                             | assignment_expression
                             ;
@@ -322,8 +359,8 @@ identifier_list.opt:      /* empty */
                         | identifier_list
                         ;
 
-pointer:      '*' type_qualifier_list.opt
-            | '*' type_qualifier_list.opt pointer
+pointer:      '*' type_qualifier_list.opt {$<strval>$ = string_duplicate("*");}
+            | '*' type_qualifier_list.opt pointer {$<strval>$ = string_from_format("*%s", $<strval>2);}
             ;
 
 type_qualifier_list:      type_qualifier
@@ -350,8 +387,8 @@ identifier_list:      identifier
                     | identifier_list ',' identifier
                     ;
 
-type_name:    speficier_qualifier_list
-            | speficier_qualifier_list abstract_declarator
+type_name:    specifier_qualifier_list
+            | specifier_qualifier_list abstract_declarator
             ;
 
 abstract_declarator:      pointer
@@ -395,20 +432,21 @@ designator:   '[' constant_expression ']'
             | '.' identifier
 
 
-statement:    labeled_statement
-            | compound_statement
-            | expression_statement
-            | selection_statement
-            | iteration_statement
-            | jump_statement
+statement:    labeled_statement     
+            | compound_statement    
+            | expression_statement  { printf("Linea %i: Sentencia de expresion\n", yylineno); }
+            | selection_statement   
+            | iteration_statement   
+            | jump_statement        { printf("Linea %i: Sentencia de salto\n", yylineno); }
+            | error ';'             { yyerrok; }
             ;
 
-labeled_statement:    identifier ':' statement
-                    | CASE constant_expression ':' statement
-                    | DEFAULT ':' statement
+labeled_statement:    identifier ':' { printf("Linea %i: Sentencia etiquetada\n", yylineno); } statement
+                    | CASE { printf("Linea %i: Sentencia etiquetada\n", yylineno); } constant_expression ':' statement
+                    | DEFAULT { printf("Linea %i: Sentencia etiquetada\n", yylineno); } ':' statement
                     ;
 
-compound_statement: '{' block_item_list.opt '}' ;
+compound_statement: '{' { printf("Linea %i: Sentencia Compuesta\n", yylineno); } block_item_list.opt '}' ;
 
 block_item_list.opt:      /* empty */
                         | block_item_list
@@ -428,16 +466,22 @@ expression.opt:   /* empty */
                 | expression
                 ;
 
-selection_statement:      IF '(' expression ')' statement %prec IFX
-                        | IF '(' expression ')' statement ELSE statement
-                        | SWITCH '(' expression ')' statement
+selection_statement:      IF { printf("Linea %i: Sentencia de seleccion\n", yylineno); } if_body
+                        | SWITCH { printf("Linea %i: Sentencia de seleccion\n", yylineno); } '(' expression ')' statement
                         ;
 
-iteration_statement:      WHILE '(' expression ')' statement
-                        | DO statement WHILE '(' expression ')' ';'
-                        | FOR '(' expression.opt ';' expression.opt ';' expression.opt ')' statement
-                        | FOR '(' declaration expression.opt ';' expression.opt ')' statement
+if_body:      '(' expression ')' statement %prec IFX
+            | '(' expression ')' statement ELSE statement
+            ;
+
+iteration_statement:      WHILE { printf("Linea %i: Sentencia de iteracion\n", yylineno); } '(' expression ')' statement
+                        | DO { printf("Linea %i: Sentencia de iteracion\n", yylineno); } statement WHILE '(' expression ')' ';'
+                        | FOR { printf("Linea %i: Sentencia de iteracion\n", yylineno); } for_body
                         ;
+
+for_body:     '(' expression.opt ';' expression.opt ';' expression.opt ')' statement
+            | '(' declaration expression.opt ';' expression.opt ')' statement
+            ;
 
 jump_statement:   GOTO identifier ';'
                 | CONTINUE ';'
@@ -453,7 +497,9 @@ external_declaration:     function_definition
                         | declaration
                         ;
 
-function_definition:      declaration_specifiers declarator declaration_list.opt compound_statement ;
+function_definition:      declaration_specifiers declarator declaration_list.opt compound_statement
+                        | error '}'             { yyerrok; }
+                        ;
 
 declaration_list.opt:     /* empty */
                         | declaration_list
@@ -468,6 +514,9 @@ declaration_list:     declaration
 int main(int argc, char *argv[]) {
     yydebug = 0;
 	yyin=fopen(argv[1],"r");
+
+    printf("Reporte sintactico:\n");
+
    	yyparse();
 	fclose(yyin);
 
@@ -479,7 +528,7 @@ int main(int argc, char *argv[]) {
 }
 
 int yyerror(const char *msg) {
-	printf("\nFallo el analisis en la linea: %d %s\n\n\n",yylineno,msg);
+	printf("Linea %d: %s\n",yylineno,msg);
 	analisisCorrecto = 0;
 	return 0; 
 }

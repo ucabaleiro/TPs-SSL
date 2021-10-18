@@ -35,14 +35,15 @@
 /* "%code requires" blocks.  */
 
 /* Line 1676 of yacc.c  */
-#line 15 "bison/parser.y"
+#line 20 "bison/parser.y"
 
+    #include <list.h>
     typedef enum types { t_char, t_uchar, t_sint, t_usint, t_int, t_uint, t_long, t_ulong, t_llong, t_ullong, t_float, t_double, t_ldouble, t_ptr } types;
 
 
 
 /* Line 1676 of yacc.c  */
-#line 46 "./include/parser.h"
+#line 47 "./include/parser.h"
 
 /* Tokens.  */
 #ifndef YYTOKENTYPE
@@ -124,15 +125,17 @@ typedef union YYSTYPE
 {
 
 /* Line 1676 of yacc.c  */
-#line 20 "bison/parser.y"
+#line 26 "bison/parser.y"
 
     char* strval;
     types tval;
+    int intval;
+    t_list* list;
 
 
 
 /* Line 1676 of yacc.c  */
-#line 136 "./include/parser.h"
+#line 139 "./include/parser.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
