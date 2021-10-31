@@ -1,13 +1,23 @@
 #include "symtable.h"
 
-symtable* symtable_create(){
-    symtable* self = malloc(sizeof(symtable));
+symtable *symtable_create(){
+    symtable *self = malloc(sizeof(symtable));
     self->elems = list_create();
     return self;
 }
 
-void symtable_destroy(symtable* self){
-    void _symbol_destroy(void* elem){
+typeInfo *typeInfo_create(){
+    typeInfo *self = malloc(sizeof(typeInfo));
+    self->next = NULL;
+}
+
+void typeInfo_destroy(typeInfo *self){
+    if(self->next != NULL) typeInfo_destroy(self->next);
+    free(self);
+}
+
+void symtable_destroy(symtable *self){
+    void _symbol_destroy(void *elem){
         symbol_destroy((symbol*) elem);
     };
     list_destroy_and_destroy_elements(self->elems, _symbol_destroy);
@@ -26,13 +36,13 @@ void symbol_destroy(symbol *self){
     free(self);
 }
 
-symbol* symtable_lookup(symtable* self, char* identifier){
-    bool matchIdentifier(void* elem){
+symbol *symtable_lookup(symtable *self, char *identifier){
+    bool matchIdentifier(void *elem){
         return ((symbol*)elem)->identifier == identifier;
     };
     return list_find(self->elems, matchIdentifier);
 }
 
-void symtable_add(symtable* self, symbol* elem){
+void symtable_add(symtable *self, symbol *elem){
     list_add(self->elems, elem);
 }

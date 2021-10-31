@@ -3,10 +3,13 @@
 
 #include "list.h"
 #include "stringso.h"
+#include <stdlib.h>
 #include <stdbool.h>
 
+typedef enum typeName { VOID, CHAR, INT, FLOAT, DOUBLE, PTR, ARRAY } typeName;
+
 typedef struct typeInfo {
-    enum { VOID, CHAR, INT, FLOAT, DOUBLE, PTR, ARRAY } name;
+    typeName type;
     typeInfo* next;
 } typeInfo;
 
@@ -22,6 +25,10 @@ typedef struct symbol {
 typedef struct symtable {
     t_list* elems;
 } symtable;
+
+typeInfo* typeInfo_create();
+
+void typeInfo_destroy();
 
 symbol *symbol_create(char *identifier);
 
