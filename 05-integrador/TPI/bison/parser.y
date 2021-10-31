@@ -5,11 +5,14 @@
 #include <stdio.h>
 #include <stringso.h>
 #include <list.h>
+#include "symtable.h"
 int yylex(void);
 int yyerror(const char *s);
 extern FILE* yyin;
 extern int yylineno;
 int analisisCorrecto = 1;
+
+symtable* st = symtable_create();
 
 %}
 
@@ -18,14 +21,17 @@ int analisisCorrecto = 1;
 
 %code requires
 {
+    #include <stdio.h>
     #include <list.h>
-    typedef enum types { t_char, t_uchar, t_sint, t_usint, t_int, t_uint, t_long, t_ulong, t_llong, t_ullong, t_float, t_double, t_ldouble, t_ptr } types;
+    #include "symtable.h"
+    #include <stringso.h>
 }
 
 %union
 {
     char* strval;
-    types tval;
+    typeInfo* type;
+    symbol* sym;
     int intval;
     t_list* list;
 }
@@ -227,18 +233,18 @@ declaration:      declaration_specifiers init_declarator_list.opt ';'
                     list_iterate($<list>2, printearDeclaracion);
                     list_destroy_and_destroy_elements($<list>2, free);
                     free($<strval>1);
-                }
+                } 
                 | error ';'             { yyerrok; }
                 ;
 
-declaration_specifiers:   storage_class_specifier declaration_specifiers.opt {$<strval>$ = string_from_format("%s%s", $<strval>1, $<strval>2);}
-                        | type_specifier declaration_specifiers.opt {$<strval>$ = string_from_format("%s%s", $<strval>1, $<strval>2);}
-                        | type_qualifier declaration_specifiers.opt {$<strval>$ = string_from_format("%s%s", $<strval>1, $<strval>2);}
-                        | function_specifier declaration_specifiers.opt {$<strval>$ = string_from_format("%s%s", $<strval>1, $<strval>2);}
+declaration_specifiers:   storage_class_specifier declaration_specifiers.opt
+                        | type_specifier declaration_specifiers.opt {$<type>$ = $<type>1;}
+                        | type_qualifier declaration_specifiers.opt
+                        | function_specifier declaration_specifiers.opt
                         ;
 
-declaration_specifiers.opt:   /* empty */ {$<strval>$ = "";}
-                            | declaration_specifiers {$<strval>$ = $<strval>1;}
+declaration_specifiers.opt:   /* empty */ {$<type>$ = typeInfo_create();}
+                            | declaration_specifiers {$<type>$ = $<type>1;}
                             ;
 
 init_declarator_list.opt:     /* empty */ {$<list>$ = list_create();}
@@ -262,18 +268,18 @@ storage_class_specifier:      TYPEDEF  {$<strval>$ = "typedef ";}
 
 type_specifier:   VOID {$<strval>$ = "void ";} 
                 | CHAR {$<strval>$ = "char ";}
-                | SHORT {$<strval>$ = "short ";} 
+                | SHORT 
                 | INT {$<strval>$ = "int ";}
-                | LONG {$<strval>$ = "long ";}
+                | LONG
                 | FLOAT {$<strval>$ = "float ";}
                 | DOUBLE {$<strval>$ = "double ";}
-                | SIGNED {$<strval>$ = "signed ";}
-                | UNSIGNED {$<strval>$ = "unsigned ";}
-                | BOOL {$<strval>$ = "bool ";}
-                | COMPLEX {$<strval>$ = "complex ";}
-                | struct_or_union_specifier {$<strval>$ = $<strval>1;}
-                | enum_specifier {$<strval>$ = $<strval>1;}
-                | typedef_name {$<strval>$ = "t ";}
+                | SIGNED
+                | UNSIGNED
+                | BOOL
+                | COMPLEX
+                | struct_or_union_specifier
+                | enum_specifier
+                | typedef_name
                 ;
 
 struct_or_union_specifier:    struct_or_union identifier '{' struct_declaration_list '}' { $<strval>$ = string_from_format("%s%s ", $<strval>1, $2);}
