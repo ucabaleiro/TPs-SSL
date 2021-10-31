@@ -1,7 +1,7 @@
-PROCESS_NAME=TP4
+PROCESS_NAME=../TP4
 IDIR =./include
-COMMONS_IDIR = ../so-commons-library/include
-COMMONS_LDIR = ../so-commons-library/lib
+COMMONS_IDIR = ./so-commons-library/include
+COMMONS_LDIR = ./so-commons-library/lib
 ODIR=./obj
 SRCDIR=./src
 LEXDIR=./lex
@@ -15,7 +15,7 @@ COMMONS_DEPS = $(wildcard $(COMMONS_IDIR)/*.h)
 SRC = $(wildcard $(SRCDIR)/*.c)
 OBJ = $(patsubst $(SRCDIR)/%.c,$(ODIR)/%.o,$(SRC))
 
-$(PROCESS_NAME): $(OBJ) $(ODIR)/lexer.o
+$(PROCESS_NAME): $(OBJ) $(ODIR)/parser.o $(ODIR)/lexer.o 
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 $(ODIR)/%.o: $(SRCDIR)/%.c $(DEPS) $(COMMONS_DEPS) | $(ODIR)
@@ -33,4 +33,4 @@ $(ODIR):
 .PHONY: clean
 
 clean:
-	rm -f $(ODIR)/*.o $(SRCDIR)/TP3.c $(PROCESS_NAME) yyout.txt
+	rm -f $(ODIR)/*.o $(SRCDIR)/lexer.c $(PROCESS_NAME) yyout.txt
