@@ -1,4 +1,4 @@
-#include "tablaDeSimbolos.h"
+#include "symtable.h"
 
 symtable* symtable_create(){
     symtable* self = malloc(sizeof(symtable));

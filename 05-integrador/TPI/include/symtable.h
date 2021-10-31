@@ -13,7 +13,7 @@ typedef struct typeInfo {
 typedef struct symbol {
     char* identifier;
     enum { VAR, FUNC } kind; 
-    typeInfo type;
+    typeInfo* type;
     // v Usado solo para funciones v
     t_list* params;
     bool isDefined;
