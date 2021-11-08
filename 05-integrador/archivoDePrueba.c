@@ -1,9 +1,12 @@
-const double *miPtr; //Para probar declaracion de variables simples
+int primerVariable;
+int *miPtr[]; //Para probar declaracion de variables simples
+
 int sumar(int a, int b); //Para probar declaracion de funciones
 
 int main()
 {
     char *(*unaVariableMuyRebuscada[10])[10][10]; //Para probar declaracion de variables FEAS
+    double **(*unosPunterosAFuncionAsquerosos[10])(int*(*)(double, float), char[*][*]);
     int a = 5;
     char* b = &a;
     double c[10];
@@ -18,7 +21,7 @@ int main()
         a++;
     }
     @ //Un error lexico de yapa
-    long int *primera, *segunda[10], tercera, *cuarta[20]; //Para probar declaracion multiple
+    int *primera, *segunda[10], tercera, *cuarta[20]; //Para probar declaracion multiple
     
     int A = (5; // Aca hay un error
     int B = 10 goto; // Aca hay otro error

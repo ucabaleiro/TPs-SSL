@@ -29,9 +29,7 @@ void typeInfo_append(typeInfo **self, typeInfo *next){
         *self = next;
         return;
     }
-    if((*self)->next != NULL){
-        typeInfo_append(&(*self)->next, next);
-    }
+    typeInfo_append(&((*self)->next), next);
 }
 
 void symtable_destroy(symtable *self){
@@ -87,12 +85,13 @@ void symtable_print(symtable *self){
     void _symbol_print(void *elem){
         symbol_print((symbol*) elem);
     };
-    printf("Dump de Tabla de Simbolos:\n");
+    printf("\nDump de Tabla de Simbolos:\n");
+    printf("-------------------------\n");
     list_iterate(self->elems, _symbol_print);
 }
 
 void symbol_print(symbol *self){
-    printf("%s:", self->identifier);
+    printf("%s: ", self->identifier);
     typeInfo_print(self->type);
     printf("\n");
 }
@@ -102,9 +101,8 @@ static char* typePrints[] = {"void", "char", "int", "float", "double", "puntero 
 void typeInfo_print(typeInfo *self){
     if(self == NULL){
         return;
-    } 
+    }
     printf("%s", typePrints[self->type]);
-
     void _parameterPrint(void *elem){
         typeInfo_print(((symbol*)elem)->type);
         printf(", ");

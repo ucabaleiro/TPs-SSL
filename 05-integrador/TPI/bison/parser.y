@@ -230,16 +230,15 @@ declaration:      declaration_specifiers init_declarator_list.opt ';'
                         typeInfo_append(&((symbol*)elem)->type, $<type>1);
                     }
                     list_iterate($<list>2, agregarEspecificador);
-                    printf("lista iterada \n\n\n");
                     symtable_addSymbols(st, $<list>2);
                 } 
                 | error ';'             { yyerrok; }
                 ;
 
-declaration_specifiers:   storage_class_specifier declaration_specifiers.opt
+declaration_specifiers:   storage_class_specifier declaration_specifiers.opt {$<type>$ = $<type>2;}
                         | type_specifier declaration_specifiers.opt {$<type>2->type = $<typeName>1; $<type>$ = $<type>2;}
-                        | type_qualifier declaration_specifiers.opt
-                        | function_specifier declaration_specifiers.opt
+                        | type_qualifier declaration_specifiers.opt {$<type>$ = $<type>2;}
+                        | function_specifier declaration_specifiers.opt {$<type>$ = $<type>2;}
                         ;
 
 declaration_specifiers.opt:   /* empty */ {$<type>$ = typeInfo_create();}
@@ -408,8 +407,8 @@ direct_abstract_declarator:   '(' abstract_declarator ')' { $<sym>$ = $<sym>2; }
                             | '[' '*' ']' { $<sym>$ = symbol_create(); $<sym>$->type = typeInfo_create(); $<sym>$->type->type = t_ARRAY; }
                             | '(' parameter_type_list ')' { $<sym>$ = symbol_create(); $<sym>$->type = typeInfo_create(); $<sym>$->type->type = t_FUNC; $<sym>$->type->params = $<list>2; }
                             | '(' ')' { $<sym>$ = symbol_create(); $<sym>$->type = typeInfo_create(); $<sym>$->type->type = t_FUNC; $<sym>$->type->params = list_create(); }
-                            | direct_abstract_declarator '['  assignment_expression.opt ']' { $<sym>$ = $<sym>2; typeInfo* t = typeInfo_create(); t->type = t_ARRAY; typeInfo_append(&$<sym>$->type, t); }
-                            | direct_abstract_declarator '[' '*' ']' { $<sym>$ = $<sym>2; typeInfo* t = typeInfo_create(); t->type = t_ARRAY; typeInfo_append(&$<sym>$->type, t); }
+                            | direct_abstract_declarator '['  assignment_expression.opt ']' { $<sym>$ = $<sym>1; typeInfo* t = typeInfo_create(); t->type = t_ARRAY; typeInfo_append(&$<sym>$->type, t); }
+                            | direct_abstract_declarator '[' '*' ']' { $<sym>$ = $<sym>1; typeInfo* t = typeInfo_create(); t->type = t_ARRAY; typeInfo_append(&$<sym>$->type, t); }
                             | direct_abstract_declarator '(' parameter_type_list ')' { $<sym>$ = $<sym>1; typeInfo* t = typeInfo_create(); t->type = t_FUNC; t->params = $<list>3; typeInfo_append(&$<sym>$->type, t); }
                             | direct_abstract_declarator '(' ')' { $<sym>$ = $<sym>1; typeInfo* t = typeInfo_create(); t->type = t_FUNC; t->params = list_create(); typeInfo_append(&$<sym>$->type, t); }
                             ;
@@ -519,7 +518,7 @@ declaration_list:     declaration
 %%
 
 int main(int argc, char *argv[]) {
-    yydebug = 1;
+    yydebug = 0;
 	yyin=fopen(argv[1],"r");
 
     st = symtable_create();
