@@ -6,20 +6,19 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-typedef enum typeName { VOID, CHAR, INT, FLOAT, DOUBLE, PTR, ARRAY } typeName;
+typedef enum typeName { t_VOID, t_CHAR, t_INT, t_FLOAT, t_DOUBLE, t_PTR, t_ARRAY, t_FUNC } typeName;
 
 typedef struct typeInfo {
     typeName type;
-    typeInfo* next;
+    struct typeInfo* next;
+    // v Usado solo para funciones v
+    t_list* params;
+    bool isDefined;
 } typeInfo;
 
 typedef struct symbol {
     char* identifier;
-    enum { VAR, FUNC } kind; 
     typeInfo* type;
-    // v Usado solo para funciones v
-    t_list* params;
-    bool isDefined;
 } symbol;
 
 typedef struct symtable {
@@ -30,7 +29,9 @@ typeInfo* typeInfo_create();
 
 void typeInfo_destroy();
 
-symbol *symbol_create(char *identifier);
+void typeInfo_append(typeInfo **self, typeInfo *next);
+
+symbol *symbol_create();
 
 void symbol_destroy(symbol *self);
 
@@ -40,6 +41,16 @@ void symtable_destroy(symtable* self);
 
 symbol* symtable_lookup(symtable* self, char* identifier);
 
-void symtable_add(symtable* self, symbol* elem);
+bool symtable_isPresent(symtable *self, char *identifier);
 
-#endif SYMTABLE_H_
+void symtable_addSymbol(symtable *self, symbol *elem);
+
+void symtable_addSymbols(symtable *self, t_list *elems);
+
+void symtable_print(symtable *self);
+
+void symbol_print(symbol *self);
+
+void typeInfo_print(typeInfo *self);
+
+#endif

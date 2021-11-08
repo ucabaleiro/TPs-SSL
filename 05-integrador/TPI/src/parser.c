@@ -76,16 +76,17 @@
 #include <stdio.h>
 #include <stringso.h>
 #include <list.h>
+#include "symtable.h"
 int yylex(void);
 int yyerror(const char *s);
 extern FILE* yyin;
 extern int yylineno;
-int analisisCorrecto = 1;
+symtable* st;
 
 
 
 /* Line 189 of yacc.c  */
-#line 89 "src/parser.c"
+#line 90 "src/parser.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -108,15 +109,17 @@ int analisisCorrecto = 1;
 /* "%code requires" blocks.  */
 
 /* Line 209 of yacc.c  */
-#line 20 "bison/parser.y"
+#line 21 "bison/parser.y"
 
+    #include <stdio.h>
     #include <list.h>
-    typedef enum types { t_char, t_uchar, t_sint, t_usint, t_int, t_uint, t_long, t_ulong, t_llong, t_ullong, t_float, t_double, t_ldouble, t_ptr } types;
+    #include "symtable.h"
+    #include <stringso.h>
 
 
 
 /* Line 209 of yacc.c  */
-#line 120 "src/parser.c"
+#line 123 "src/parser.c"
 
 /* Tokens.  */
 #ifndef YYTOKENTYPE
@@ -198,17 +201,19 @@ typedef union YYSTYPE
 {
 
 /* Line 214 of yacc.c  */
-#line 26 "bison/parser.y"
+#line 29 "bison/parser.y"
 
     char* strval;
-    types tval;
+    typeInfo* type;
+    typeName typeName;
+    symbol* sym;
     int intval;
     t_list* list;
 
 
 
 /* Line 214 of yacc.c  */
-#line 212 "src/parser.c"
+#line 217 "src/parser.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -220,7 +225,7 @@ typedef union YYSTYPE
 
 
 /* Line 264 of yacc.c  */
-#line 224 "src/parser.c"
+#line 229 "src/parser.c"
 
 #ifdef short
 # undef short
@@ -608,32 +613,32 @@ static const yytype_int16 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   109,   109,   111,   112,   113,   116,   118,   120,   121,
-     122,   123,   126,   127,   128,   129,   130,   131,   132,   133,
-     134,   137,   138,   141,   142,   143,   144,   145,   146,   149,
-     149,   149,   149,   149,   149,   151,   152,   155,   156,   157,
-     158,   161,   162,   163,   166,   167,   168,   171,   172,   173,
-     174,   175,   179,   180,   181,   184,   185,   188,   189,   192,
-     193,   196,   197,   200,   201,   204,   205,   208,   209,   212,
-     212,   212,   212,   212,   212,   213,   213,   213,   213,   213,
-     216,   217,   220,   222,   231,   234,   235,   236,   237,   240,
-     241,   244,   245,   248,   249,   252,   253,   256,   257,   258,
-     259,   260,   263,   264,   265,   266,   267,   268,   269,   270,
-     271,   272,   273,   274,   275,   276,   279,   280,   281,   284,
-     284,   286,   287,   290,   292,   293,   296,   297,   300,   301,
-     304,   305,   308,   309,   312,   313,   314,   317,   318,   321,
-     322,   325,   326,   329,   330,   331,   334,   336,   337,   340,
-     341,   342,   343,   344,   345,   346,   347,   350,   351,   354,
-     355,   358,   359,   362,   363,   366,   367,   370,   371,   374,
-     375,   378,   379,   382,   383,   386,   387,   390,   391,   394,
-     395,   396,   399,   400,   401,   402,   403,   404,   405,   406,
-     407,   410,   412,   413,   414,   417,   418,   421,   422,   425,
-     427,   428,   431,   432,   435,   436,   437,   438,   439,   440,
-     441,   444,   444,   445,   445,   446,   446,   449,   449,   451,
-     452,   455,   456,   459,   460,   463,   465,   466,   469,   469,
-     470,   470,   473,   474,   477,   477,   478,   478,   479,   479,
-     482,   483,   486,   487,   488,   489,   492,   493,   496,   497,
-     500,   501,   504,   505,   508,   509
+       0,   114,   114,   116,   117,   118,   121,   123,   125,   126,
+     127,   128,   131,   132,   133,   134,   135,   136,   137,   138,
+     139,   142,   143,   146,   147,   148,   149,   150,   151,   154,
+     154,   154,   154,   154,   154,   156,   157,   160,   161,   162,
+     163,   166,   167,   168,   171,   172,   173,   176,   177,   178,
+     179,   180,   184,   185,   186,   189,   190,   193,   194,   197,
+     198,   201,   202,   205,   206,   209,   210,   213,   214,   217,
+     217,   217,   217,   217,   217,   218,   218,   218,   218,   218,
+     221,   222,   225,   227,   236,   239,   240,   241,   242,   245,
+     246,   249,   250,   253,   254,   257,   258,   261,   262,   263,
+     264,   265,   268,   269,   270,   271,   272,   273,   274,   275,
+     276,   277,   278,   279,   280,   281,   284,   285,   286,   289,
+     289,   291,   292,   295,   297,   298,   301,   302,   305,   306,
+     309,   310,   313,   314,   317,   318,   319,   322,   323,   326,
+     327,   330,   331,   334,   335,   336,   339,   341,   342,   345,
+     346,   347,   348,   349,   350,   351,   352,   357,   358,   361,
+     362,   365,   366,   369,   370,   373,   374,   377,   378,   381,
+     382,   385,   386,   389,   390,   393,   394,   397,   398,   401,
+     402,   403,   406,   407,   408,   409,   410,   411,   412,   413,
+     414,   417,   419,   420,   421,   424,   425,   428,   429,   432,
+     434,   435,   438,   439,   442,   443,   444,   445,   446,   447,
+     448,   451,   451,   452,   452,   453,   453,   456,   456,   458,
+     459,   462,   463,   466,   467,   470,   472,   473,   476,   476,
+     477,   477,   480,   481,   484,   484,   485,   485,   486,   486,
+     489,   490,   493,   494,   495,   496,   499,   500,   503,   504,
+     507,   508,   511,   512,   515,   516
 };
 #endif
 
@@ -2087,525 +2092,476 @@ yyreduce:
         case 2:
 
 /* Line 1455 of yacc.c  */
-#line 109 "bison/parser.y"
+#line 114 "bison/parser.y"
     {(yyval.strval) = (yyvsp[(1) - (1)].strval);;}
     break;
 
   case 83:
 
 /* Line 1455 of yacc.c  */
-#line 223 "bison/parser.y"
+#line 228 "bison/parser.y"
     {
-                    void printearDeclaracion(void* elem){
-                        printf("Linea %i: Declaracion - %s%s\n", yylineno, (yyvsp[(1) - (3)].strval), (char*)elem);
+                    void agregarEspecificador(void* elem){
+                        typeInfo_append(&((symbol*)elem)->type, (yyvsp[(1) - (3)].type));
                     }
-                    list_iterate((yyvsp[(2) - (3)].list), printearDeclaracion);
-                    list_destroy_and_destroy_elements((yyvsp[(2) - (3)].list), free);
-                    free((yyvsp[(1) - (3)].strval));
+                    list_iterate((yyvsp[(2) - (3)].list), agregarEspecificador);
+                    printf("lista iterada \n\n\n");
+                    symtable_addSymbols(st, (yyvsp[(2) - (3)].list));
                 ;}
     break;
 
   case 84:
 
 /* Line 1455 of yacc.c  */
-#line 231 "bison/parser.y"
+#line 236 "bison/parser.y"
     { yyerrok; ;}
-    break;
-
-  case 85:
-
-/* Line 1455 of yacc.c  */
-#line 234 "bison/parser.y"
-    {(yyval.strval) = string_from_format("%s%s", (yyvsp[(1) - (2)].strval), (yyvsp[(2) - (2)].strval));;}
     break;
 
   case 86:
 
 /* Line 1455 of yacc.c  */
-#line 235 "bison/parser.y"
-    {(yyval.strval) = string_from_format("%s%s", (yyvsp[(1) - (2)].strval), (yyvsp[(2) - (2)].strval));;}
-    break;
-
-  case 87:
-
-/* Line 1455 of yacc.c  */
-#line 236 "bison/parser.y"
-    {(yyval.strval) = string_from_format("%s%s", (yyvsp[(1) - (2)].strval), (yyvsp[(2) - (2)].strval));;}
-    break;
-
-  case 88:
-
-/* Line 1455 of yacc.c  */
-#line 237 "bison/parser.y"
-    {(yyval.strval) = string_from_format("%s%s", (yyvsp[(1) - (2)].strval), (yyvsp[(2) - (2)].strval));;}
+#line 240 "bison/parser.y"
+    {(yyvsp[(2) - (2)].type)->type = (yyvsp[(1) - (2)].typeName); (yyval.type) = (yyvsp[(2) - (2)].type);;}
     break;
 
   case 89:
 
 /* Line 1455 of yacc.c  */
-#line 240 "bison/parser.y"
-    {(yyval.strval) = "";;}
+#line 245 "bison/parser.y"
+    {(yyval.type) = typeInfo_create();;}
     break;
 
   case 90:
 
 /* Line 1455 of yacc.c  */
-#line 241 "bison/parser.y"
-    {(yyval.strval) = (yyvsp[(1) - (1)].strval);;}
+#line 246 "bison/parser.y"
+    {(yyval.type) = (yyvsp[(1) - (1)].type);;}
     break;
 
   case 91:
 
 /* Line 1455 of yacc.c  */
-#line 244 "bison/parser.y"
+#line 249 "bison/parser.y"
     {(yyval.list) = list_create();;}
     break;
 
   case 92:
 
 /* Line 1455 of yacc.c  */
-#line 245 "bison/parser.y"
+#line 250 "bison/parser.y"
     {(yyval.list) = (yyvsp[(1) - (1)].list);;}
     break;
 
   case 93:
 
 /* Line 1455 of yacc.c  */
-#line 248 "bison/parser.y"
-    {(yyval.list) = list_create(); list_add((yyval.list), (yyvsp[(1) - (1)].strval));;}
+#line 253 "bison/parser.y"
+    {(yyval.list) = list_create(); list_add((yyval.list), (yyvsp[(1) - (1)].sym));;}
     break;
 
   case 94:
 
 /* Line 1455 of yacc.c  */
-#line 249 "bison/parser.y"
-    {(yyval.list) = (yyvsp[(1) - (3)].list); list_add((yyval.list), (yyvsp[(3) - (3)].strval));;}
+#line 254 "bison/parser.y"
+    {(yyval.list) = (yyvsp[(1) - (3)].list); list_add((yyval.list), (yyvsp[(3) - (3)].sym));;}
     break;
 
   case 95:
 
 /* Line 1455 of yacc.c  */
-#line 252 "bison/parser.y"
-    {(yyval.strval) = (yyvsp[(1) - (1)].strval);;}
+#line 257 "bison/parser.y"
+    {(yyval.sym) = (yyvsp[(1) - (1)].sym);;}
     break;
 
   case 96:
 
 /* Line 1455 of yacc.c  */
-#line 253 "bison/parser.y"
-    {(yyval.strval) = (yyvsp[(1) - (3)].strval);;}
-    break;
-
-  case 97:
-
-/* Line 1455 of yacc.c  */
-#line 256 "bison/parser.y"
-    {(yyval.strval) = "typedef ";;}
-    break;
-
-  case 98:
-
-/* Line 1455 of yacc.c  */
-#line 257 "bison/parser.y"
-    {(yyval.strval) = "extern ";;}
-    break;
-
-  case 99:
-
-/* Line 1455 of yacc.c  */
 #line 258 "bison/parser.y"
-    {(yyval.strval) = "static ";;}
-    break;
-
-  case 100:
-
-/* Line 1455 of yacc.c  */
-#line 259 "bison/parser.y"
-    {(yyval.strval) = "auto ";;}
-    break;
-
-  case 101:
-
-/* Line 1455 of yacc.c  */
-#line 260 "bison/parser.y"
-    {(yyval.strval) = "register ";;}
+    {(yyval.sym) = (yyvsp[(1) - (3)].sym);;}
     break;
 
   case 102:
 
 /* Line 1455 of yacc.c  */
-#line 263 "bison/parser.y"
-    {(yyval.strval) = "void ";;}
+#line 268 "bison/parser.y"
+    {(yyval.typeName) = t_VOID;;}
     break;
 
   case 103:
 
 /* Line 1455 of yacc.c  */
-#line 264 "bison/parser.y"
-    {(yyval.strval) = "char ";;}
-    break;
-
-  case 104:
-
-/* Line 1455 of yacc.c  */
-#line 265 "bison/parser.y"
-    {(yyval.strval) = "short ";;}
+#line 269 "bison/parser.y"
+    {(yyval.typeName) = t_CHAR;;}
     break;
 
   case 105:
 
 /* Line 1455 of yacc.c  */
-#line 266 "bison/parser.y"
-    {(yyval.strval) = "int ";;}
-    break;
-
-  case 106:
-
-/* Line 1455 of yacc.c  */
-#line 267 "bison/parser.y"
-    {(yyval.strval) = "long ";;}
+#line 271 "bison/parser.y"
+    {(yyval.typeName) = t_INT;;}
     break;
 
   case 107:
 
 /* Line 1455 of yacc.c  */
-#line 268 "bison/parser.y"
-    {(yyval.strval) = "float ";;}
+#line 273 "bison/parser.y"
+    {(yyval.typeName) = t_FLOAT;;}
     break;
 
   case 108:
 
 /* Line 1455 of yacc.c  */
-#line 269 "bison/parser.y"
-    {(yyval.strval) = "double ";;}
-    break;
-
-  case 109:
-
-/* Line 1455 of yacc.c  */
-#line 270 "bison/parser.y"
-    {(yyval.strval) = "signed ";;}
-    break;
-
-  case 110:
-
-/* Line 1455 of yacc.c  */
-#line 271 "bison/parser.y"
-    {(yyval.strval) = "unsigned ";;}
-    break;
-
-  case 111:
-
-/* Line 1455 of yacc.c  */
-#line 272 "bison/parser.y"
-    {(yyval.strval) = "bool ";;}
-    break;
-
-  case 112:
-
-/* Line 1455 of yacc.c  */
-#line 273 "bison/parser.y"
-    {(yyval.strval) = "complex ";;}
-    break;
-
-  case 113:
-
-/* Line 1455 of yacc.c  */
 #line 274 "bison/parser.y"
-    {(yyval.strval) = (yyvsp[(1) - (1)].strval);;}
-    break;
-
-  case 114:
-
-/* Line 1455 of yacc.c  */
-#line 275 "bison/parser.y"
-    {(yyval.strval) = (yyvsp[(1) - (1)].strval);;}
-    break;
-
-  case 115:
-
-/* Line 1455 of yacc.c  */
-#line 276 "bison/parser.y"
-    {(yyval.strval) = "t ";;}
-    break;
-
-  case 116:
-
-/* Line 1455 of yacc.c  */
-#line 279 "bison/parser.y"
-    { (yyval.strval) = string_from_format("%s%s ", (yyvsp[(1) - (5)].strval), (yyvsp[(2) - (5)].strval));;}
-    break;
-
-  case 117:
-
-/* Line 1455 of yacc.c  */
-#line 280 "bison/parser.y"
-    { (yyval.strval) = string_from_format("%s anonimo ", (yyvsp[(1) - (4)].strval));;}
-    break;
-
-  case 118:
-
-/* Line 1455 of yacc.c  */
-#line 281 "bison/parser.y"
-    { (yyval.strval) = string_from_format("%s%s ", (yyvsp[(1) - (2)].strval), (yyvsp[(2) - (2)].strval));;}
-    break;
-
-  case 119:
-
-/* Line 1455 of yacc.c  */
-#line 284 "bison/parser.y"
-    {(yyval.strval) = "struct ";;}
-    break;
-
-  case 120:
-
-/* Line 1455 of yacc.c  */
-#line 284 "bison/parser.y"
-    {(yyval.strval) = "union ";;}
-    break;
-
-  case 134:
-
-/* Line 1455 of yacc.c  */
-#line 312 "bison/parser.y"
-    { (yyval.strval) = string_from_format("enum %s ", (yyvsp[(2) - (5)].strval));;}
-    break;
-
-  case 135:
-
-/* Line 1455 of yacc.c  */
-#line 313 "bison/parser.y"
-    { (yyval.strval) = string_from_format("enum %s ", (yyvsp[(2) - (6)].strval));;}
-    break;
-
-  case 136:
-
-/* Line 1455 of yacc.c  */
-#line 314 "bison/parser.y"
-    { (yyval.strval) = string_from_format("enum %s ", (yyvsp[(2) - (2)].strval));;}
+    {(yyval.typeName) = t_DOUBLE;;}
     break;
 
   case 137:
 
 /* Line 1455 of yacc.c  */
-#line 317 "bison/parser.y"
-    {(yyval.strval) = "anonimo";;}
+#line 322 "bison/parser.y"
+    {(yyval.strval) = NULL;;}
     break;
 
   case 138:
 
 /* Line 1455 of yacc.c  */
-#line 318 "bison/parser.y"
+#line 323 "bison/parser.y"
     {(yyval.strval) = (yyvsp[(1) - (1)].strval);;}
-    break;
-
-  case 143:
-
-/* Line 1455 of yacc.c  */
-#line 329 "bison/parser.y"
-    {(yyval.strval) = "const ";;}
-    break;
-
-  case 144:
-
-/* Line 1455 of yacc.c  */
-#line 330 "bison/parser.y"
-    {(yyval.strval) = "restrict ";;}
-    break;
-
-  case 145:
-
-/* Line 1455 of yacc.c  */
-#line 331 "bison/parser.y"
-    {(yyval.strval) = "volatile ";;}
-    break;
-
-  case 146:
-
-/* Line 1455 of yacc.c  */
-#line 334 "bison/parser.y"
-    {(yyval.strval) = "inline ";;}
     break;
 
   case 147:
 
 /* Line 1455 of yacc.c  */
-#line 336 "bison/parser.y"
-    {string_append(&(yyvsp[(1) - (2)].strval), (yyvsp[(2) - (2)].strval)); (yyval.strval) = (yyvsp[(1) - (2)].strval);;}
+#line 341 "bison/parser.y"
+    {typeInfo_append(&(yyvsp[(2) - (2)].sym)->type, (yyvsp[(1) - (2)].type)); (yyval.sym) = (yyvsp[(2) - (2)].sym);;}
     break;
 
   case 148:
 
 /* Line 1455 of yacc.c  */
-#line 337 "bison/parser.y"
-    {(yyval.strval) = string_duplicate((yyvsp[(1) - (1)].strval));;}
+#line 342 "bison/parser.y"
+    {(yyval.sym) = (yyvsp[(1) - (1)].sym);;}
     break;
 
   case 149:
 
 /* Line 1455 of yacc.c  */
-#line 340 "bison/parser.y"
-    {(yyval.strval) = string_duplicate((yyvsp[(1) - (1)].strval));;}
+#line 345 "bison/parser.y"
+    {(yyval.sym) = symbol_create((yyvsp[(1) - (1)].strval)); (yyval.sym)->identifier = string_duplicate((yyvsp[(1) - (1)].strval));;}
     break;
 
   case 150:
 
 /* Line 1455 of yacc.c  */
-#line 341 "bison/parser.y"
-    {(yyval.strval) = string_from_format("(%s)", (yyvsp[(2) - (3)].strval));;}
+#line 346 "bison/parser.y"
+    { (yyval.sym) = (yyvsp[(2) - (3)].sym); ;}
     break;
 
   case 151:
 
 /* Line 1455 of yacc.c  */
-#line 342 "bison/parser.y"
-    {string_append(&(yyvsp[(1) - (5)].strval), "[]"); (yyval.strval) = (yyvsp[(1) - (5)].strval);;}
+#line 347 "bison/parser.y"
+    {typeInfo* t = typeInfo_create(); t->type = t_ARRAY; typeInfo_append(&(yyvsp[(1) - (5)].sym)->type, t); (yyval.sym) = (yyvsp[(1) - (5)].sym);;}
     break;
 
   case 152:
 
 /* Line 1455 of yacc.c  */
-#line 343 "bison/parser.y"
-    {string_append(&(yyvsp[(1) - (6)].strval), "[]"); (yyval.strval) = (yyvsp[(1) - (6)].strval);;}
+#line 348 "bison/parser.y"
+    {typeInfo* t = typeInfo_create(); t->type = t_ARRAY; typeInfo_append(&(yyvsp[(1) - (6)].sym)->type, t); (yyval.sym) = (yyvsp[(1) - (6)].sym);;}
     break;
 
   case 153:
 
 /* Line 1455 of yacc.c  */
-#line 344 "bison/parser.y"
-    {string_append(&(yyvsp[(1) - (6)].strval), "[]"); (yyval.strval) = (yyvsp[(1) - (6)].strval);;}
+#line 349 "bison/parser.y"
+    {typeInfo* t = typeInfo_create(); t->type = t_ARRAY; typeInfo_append(&(yyvsp[(1) - (6)].sym)->type, t); (yyval.sym) = (yyvsp[(1) - (6)].sym);;}
     break;
 
   case 154:
 
 /* Line 1455 of yacc.c  */
-#line 345 "bison/parser.y"
-    {string_append(&(yyvsp[(1) - (5)].strval), "[]"); (yyval.strval) = (yyvsp[(1) - (5)].strval);;}
+#line 350 "bison/parser.y"
+    {typeInfo* t = typeInfo_create(); t->type = t_ARRAY; typeInfo_append(&(yyvsp[(1) - (5)].sym)->type, t); (yyval.sym) = (yyvsp[(1) - (5)].sym);;}
     break;
 
   case 155:
 
 /* Line 1455 of yacc.c  */
-#line 346 "bison/parser.y"
-    {string_append(&(yyvsp[(1) - (4)].strval), "()"); (yyval.strval) = (yyvsp[(1) - (4)].strval);;}
+#line 351 "bison/parser.y"
+    {typeInfo* t = typeInfo_create(); t->type = t_FUNC; t->params = (yyvsp[(3) - (4)].list); typeInfo_append(&(yyvsp[(1) - (4)].sym)->type, t); (yyval.sym) = (yyvsp[(1) - (4)].sym);;}
     break;
 
   case 156:
 
 /* Line 1455 of yacc.c  */
-#line 347 "bison/parser.y"
-    {string_append(&(yyvsp[(1) - (4)].strval), "()"); (yyval.strval) = (yyvsp[(1) - (4)].strval);;}
+#line 352 "bison/parser.y"
+    {typeInfo* t = typeInfo_create(); t->type = t_FUNC; t->params = (yyvsp[(3) - (4)].list); typeInfo_append(&(yyvsp[(1) - (4)].sym)->type, t); (yyval.sym) = (yyvsp[(1) - (4)].sym);;}
+    break;
+
+  case 161:
+
+/* Line 1455 of yacc.c  */
+#line 365 "bison/parser.y"
+    {(yyval.list) = list_create();;}
+    break;
+
+  case 162:
+
+/* Line 1455 of yacc.c  */
+#line 366 "bison/parser.y"
+    { /* Por aca no consideramos que entre nunca, ya que es un formato obsoleto de declaracion, usamos las otras */;}
     break;
 
   case 163:
 
 /* Line 1455 of yacc.c  */
-#line 362 "bison/parser.y"
-    {(yyval.strval) = string_duplicate("*");;}
+#line 369 "bison/parser.y"
+    { (yyval.type) = typeInfo_create(); (yyval.type)->type = t_PTR; ;}
     break;
 
   case 164:
 
 /* Line 1455 of yacc.c  */
-#line 363 "bison/parser.y"
-    {(yyval.strval) = string_from_format("*%s", (yyvsp[(2) - (3)].strval));;}
+#line 370 "bison/parser.y"
+    {typeInfo* t = typeInfo_create(); t->type = t_PTR; typeInfo_append(&(yyvsp[(3) - (3)].type), t); (yyval.type) = (yyvsp[(3) - (3)].type);;}
+    break;
+
+  case 167:
+
+/* Line 1455 of yacc.c  */
+#line 377 "bison/parser.y"
+    {(yyval.list) = (yyvsp[(1) - (1)].list);;}
+    break;
+
+  case 168:
+
+/* Line 1455 of yacc.c  */
+#line 378 "bison/parser.y"
+    {(yyval.list) = (yyvsp[(1) - (3)].list); /* TODO: Por ahora ignoramos variargs */ ;}
+    break;
+
+  case 169:
+
+/* Line 1455 of yacc.c  */
+#line 381 "bison/parser.y"
+    {(yyval.list) = list_create(); list_add((yyval.list), (yyvsp[(1) - (1)].sym));;}
+    break;
+
+  case 170:
+
+/* Line 1455 of yacc.c  */
+#line 382 "bison/parser.y"
+    {(yyval.list) = (yyvsp[(1) - (3)].list); list_add((yyval.list), (yyvsp[(3) - (3)].sym));;}
+    break;
+
+  case 171:
+
+/* Line 1455 of yacc.c  */
+#line 385 "bison/parser.y"
+    { (yyval.sym) = (yyvsp[(2) - (2)].sym); typeInfo_append(&(yyval.sym)->type, (yyvsp[(1) - (2)].type)); ;}
+    break;
+
+  case 172:
+
+/* Line 1455 of yacc.c  */
+#line 386 "bison/parser.y"
+    { (yyval.sym) = (yyvsp[(2) - (2)].sym); typeInfo_append(&(yyval.sym)->type, (yyvsp[(1) - (2)].type)); ;}
+    break;
+
+  case 173:
+
+/* Line 1455 of yacc.c  */
+#line 389 "bison/parser.y"
+    { (yyval.sym) = symbol_create(); ;}
+    break;
+
+  case 174:
+
+/* Line 1455 of yacc.c  */
+#line 390 "bison/parser.y"
+    { (yyval.sym) = (yyvsp[(1) - (1)].sym); ;}
+    break;
+
+  case 179:
+
+/* Line 1455 of yacc.c  */
+#line 401 "bison/parser.y"
+    { (yyval.sym) = symbol_create(); typeInfo_append(&(yyval.sym)->type, (yyvsp[(1) - (1)].type)); ;}
+    break;
+
+  case 180:
+
+/* Line 1455 of yacc.c  */
+#line 402 "bison/parser.y"
+    { (yyval.sym) = (yyvsp[(2) - (2)].sym); typeInfo_append(&(yyval.sym)->type, (yyvsp[(1) - (2)].type)); ;}
+    break;
+
+  case 181:
+
+/* Line 1455 of yacc.c  */
+#line 403 "bison/parser.y"
+    { (yyval.sym) = (yyvsp[(1) - (1)].sym); ;}
+    break;
+
+  case 182:
+
+/* Line 1455 of yacc.c  */
+#line 406 "bison/parser.y"
+    { (yyval.sym) = (yyvsp[(2) - (3)].sym); ;}
+    break;
+
+  case 183:
+
+/* Line 1455 of yacc.c  */
+#line 407 "bison/parser.y"
+    { (yyval.sym) = symbol_create(); (yyval.sym)->type = typeInfo_create(); (yyval.sym)->type->type = t_ARRAY; ;}
+    break;
+
+  case 184:
+
+/* Line 1455 of yacc.c  */
+#line 408 "bison/parser.y"
+    { (yyval.sym) = symbol_create(); (yyval.sym)->type = typeInfo_create(); (yyval.sym)->type->type = t_ARRAY; ;}
+    break;
+
+  case 185:
+
+/* Line 1455 of yacc.c  */
+#line 409 "bison/parser.y"
+    { (yyval.sym) = symbol_create(); (yyval.sym)->type = typeInfo_create(); (yyval.sym)->type->type = t_FUNC; (yyval.sym)->type->params = (yyvsp[(2) - (3)].list); ;}
+    break;
+
+  case 186:
+
+/* Line 1455 of yacc.c  */
+#line 410 "bison/parser.y"
+    { (yyval.sym) = symbol_create(); (yyval.sym)->type = typeInfo_create(); (yyval.sym)->type->type = t_FUNC; (yyval.sym)->type->params = list_create(); ;}
+    break;
+
+  case 187:
+
+/* Line 1455 of yacc.c  */
+#line 411 "bison/parser.y"
+    { (yyval.sym) = (yyvsp[(2) - (4)].sym); typeInfo* t = typeInfo_create(); t->type = t_ARRAY; typeInfo_append(&(yyval.sym)->type, t); ;}
+    break;
+
+  case 188:
+
+/* Line 1455 of yacc.c  */
+#line 412 "bison/parser.y"
+    { (yyval.sym) = (yyvsp[(2) - (4)].sym); typeInfo* t = typeInfo_create(); t->type = t_ARRAY; typeInfo_append(&(yyval.sym)->type, t); ;}
+    break;
+
+  case 189:
+
+/* Line 1455 of yacc.c  */
+#line 413 "bison/parser.y"
+    { (yyval.sym) = (yyvsp[(1) - (4)].sym); typeInfo* t = typeInfo_create(); t->type = t_FUNC; t->params = (yyvsp[(3) - (4)].list); typeInfo_append(&(yyval.sym)->type, t); ;}
+    break;
+
+  case 190:
+
+/* Line 1455 of yacc.c  */
+#line 414 "bison/parser.y"
+    { (yyval.sym) = (yyvsp[(1) - (3)].sym); typeInfo* t = typeInfo_create(); t->type = t_FUNC; t->params = list_create(); typeInfo_append(&(yyval.sym)->type, t); ;}
     break;
 
   case 206:
 
 /* Line 1455 of yacc.c  */
-#line 437 "bison/parser.y"
+#line 444 "bison/parser.y"
     { printf("Linea %i: Sentencia de expresion\n", yylineno); ;}
     break;
 
   case 209:
 
 /* Line 1455 of yacc.c  */
-#line 440 "bison/parser.y"
+#line 447 "bison/parser.y"
     { printf("Linea %i: Sentencia de salto\n", yylineno); ;}
     break;
 
   case 210:
 
 /* Line 1455 of yacc.c  */
-#line 441 "bison/parser.y"
+#line 448 "bison/parser.y"
     { yyerrok; ;}
     break;
 
   case 211:
 
 /* Line 1455 of yacc.c  */
-#line 444 "bison/parser.y"
+#line 451 "bison/parser.y"
     { printf("Linea %i: Sentencia etiquetada\n", yylineno); ;}
     break;
 
   case 213:
 
 /* Line 1455 of yacc.c  */
-#line 445 "bison/parser.y"
+#line 452 "bison/parser.y"
     { printf("Linea %i: Sentencia etiquetada\n", yylineno); ;}
     break;
 
   case 215:
 
 /* Line 1455 of yacc.c  */
-#line 446 "bison/parser.y"
+#line 453 "bison/parser.y"
     { printf("Linea %i: Sentencia etiquetada\n", yylineno); ;}
     break;
 
   case 217:
 
 /* Line 1455 of yacc.c  */
-#line 449 "bison/parser.y"
+#line 456 "bison/parser.y"
     { printf("Linea %i: Sentencia Compuesta\n", yylineno); ;}
     break;
 
   case 228:
 
 /* Line 1455 of yacc.c  */
-#line 469 "bison/parser.y"
+#line 476 "bison/parser.y"
     { printf("Linea %i: Sentencia de seleccion\n", yylineno); ;}
     break;
 
   case 230:
 
 /* Line 1455 of yacc.c  */
-#line 470 "bison/parser.y"
+#line 477 "bison/parser.y"
     { printf("Linea %i: Sentencia de seleccion\n", yylineno); ;}
     break;
 
   case 234:
 
 /* Line 1455 of yacc.c  */
-#line 477 "bison/parser.y"
+#line 484 "bison/parser.y"
     { printf("Linea %i: Sentencia de iteracion\n", yylineno); ;}
     break;
 
   case 236:
 
 /* Line 1455 of yacc.c  */
-#line 478 "bison/parser.y"
+#line 485 "bison/parser.y"
     { printf("Linea %i: Sentencia de iteracion\n", yylineno); ;}
     break;
 
   case 238:
 
 /* Line 1455 of yacc.c  */
-#line 479 "bison/parser.y"
+#line 486 "bison/parser.y"
     { printf("Linea %i: Sentencia de iteracion\n", yylineno); ;}
     break;
 
   case 251:
 
 /* Line 1455 of yacc.c  */
-#line 501 "bison/parser.y"
+#line 508 "bison/parser.y"
     { yyerrok; ;}
     break;
 
 
 
 /* Line 1455 of yacc.c  */
-#line 2609 "src/parser.c"
+#line 2565 "src/parser.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2817,27 +2773,23 @@ yyreturn:
 
 
 /* Line 1675 of yacc.c  */
-#line 512 "bison/parser.y"
+#line 519 "bison/parser.y"
 
 
 int main(int argc, char *argv[]) {
-    yydebug = 0;
+    yydebug = 1;
 	yyin=fopen(argv[1],"r");
 
-    printf("Reporte sintactico:\n");
-
+    st = symtable_create();
    	yyparse();
-	fclose(yyin);
+	
+    symtable_print(st);
 
-	if(analisisCorrecto)
-        printf("\nAnalisis finalizado correctamente\n\n\n");
-
-
+    fclose(yyin);
     return 0; 
 }
 
 int yyerror(const char *msg) {
 	printf("Linea %d: %s\n",yylineno,msg);
-	analisisCorrecto = 0;
 	return 0; 
 }

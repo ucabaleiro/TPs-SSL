@@ -146,10 +146,10 @@ comentario_ml               "/*"([^*]|(\*+[^*/]))*"*"+"/"
 "t"                         {return 't';}
 
 {identificador}             {yylval.strval = strdup(yytext); return IDENTIFIER;}
-{const_char}                {yylval.tval = t_char; return CHAR_CONST;}
-{const_entero}              {yylval.tval = t_llong; return INT_CONST;}
-{const_float}               {yylval.tval = t_ldouble; return REAL_CONST;}
-{literal_cadena}            {yylval.tval = t_ptr; return STRING_LITERAL;}
+{const_char}                {return CHAR_CONST;}
+{const_entero}              {return INT_CONST;}
+{const_float}               {return REAL_CONST;}
+{literal_cadena}            {return STRING_LITERAL;}
 [\t \n]                     {}
 {comentario_sl}             {}
 {comentario_ml}             {}
