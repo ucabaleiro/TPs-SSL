@@ -6,7 +6,7 @@ int sumar(int a, int b); //Para probar declaracion de funciones
 int main()
 {
     char *(*unaVariableMuyRebuscada[10])[10][10]; //Para probar declaracion de variables FEAS
-    double **(*unosPunterosAFuncionAsquerosos[10])(int*(*)(double, float), char[*][*]);
+    double **(*unosPunterosAFuncionAsquerosos[10])(int*(*)(double, float), char[*][*]); //Para probar declaraciones aun mas feas
     int a = 5;
     char* b = &a;
     double c[10];
