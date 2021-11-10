@@ -1,7 +1,27 @@
 #include "symtable.h"
 #include <stdio.h>
+#include <string.h>
 
 extern int yylineno;
+
+void printError(char* format, ...) {
+    printf("Linea %d: Error semantico -", yylineno);
+    va_list args;
+    va_start(args, format);
+    vprintf(format, args);
+    printf("\n");
+    va_end(args);
+}
+
+void initBaseTypes(){
+    typeInt = typeInfo_create(); typeInt->type = t_INT;
+    typeChar = typeInfo_create(); typeChar->type = t_CHAR;
+    typeVoid = typeInfo_create(); typeVoid->type = t_VOID;
+    typeFloat = typeInfo_create(); typeFloat->type = t_FLOAT;
+    typeDouble = typeInfo_create(); typeDouble->type = t_DOUBLE;
+    typeString = typeInfo_create(); typeString->type = t_PTR; typeString->next = typeInfo_create(); typeString->next->type = t_CHAR;
+    typeError = typeInfo_create(); typeError->type = t_ERROR;
+}
 
 symtable *symtable_create(){
     symtable *self = malloc(sizeof(symtable));
@@ -55,18 +75,19 @@ void symbol_destroy(symbol *self){
 
 symbol *symtable_lookup(symtable *self, char *identifier){
     bool matchIdentifier(void *elem){
-        return ((symbol*)elem)->identifier == identifier;
+        return !strcmp(((symbol*)elem)->identifier, identifier);
     };
     return list_find(self->elems, matchIdentifier);
 }
 
 bool symtable_isPresent(symtable *self, char *identifier){
-    return symtable_lookup(self, identifier) != NULL;
+    symbol* encontrado = symtable_lookup(self, identifier);
+    return encontrado != NULL;
 }
 
 void symtable_addSymbol(symtable *self, symbol *elem){
     if(symtable_isPresent(self, elem->identifier)){
-        printf("Linea %d: Error Semantico - El simbolo %s ya esta declarado\n", yylineno, elem->identifier);
+        printError("El simbolo %s ya esta declarado", elem->identifier);
         return;
     }
     list_add(self->elems, elem);

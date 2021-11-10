@@ -4,9 +4,12 @@
 #include "list.h"
 #include "stringso.h"
 #include <stdlib.h>
+#include <stdarg.h>
 #include <stdbool.h>
 
-typedef enum typeName { t_VOID, t_CHAR, t_INT, t_FLOAT, t_DOUBLE, t_PTR, t_ARRAY, t_FUNC } typeName;
+void printError(char* format, ...);
+
+typedef enum typeName { t_VOID, t_CHAR, t_INT, t_FLOAT, t_DOUBLE, t_PTR, t_ARRAY, t_FUNC, t_ERROR } typeName;
 
 typedef struct typeInfo {
     typeName type;
@@ -15,6 +18,16 @@ typedef struct typeInfo {
     t_list* params;
     bool isDefined;
 } typeInfo;
+
+typeInfo* typeInt;
+typeInfo* typeChar;
+typeInfo* typeVoid;
+typeInfo* typeFloat;
+typeInfo* typeDouble;
+typeInfo* typeString;
+typeInfo* typeError;
+
+void initBaseTypes();
 
 typedef struct symbol {
     char* identifier;
