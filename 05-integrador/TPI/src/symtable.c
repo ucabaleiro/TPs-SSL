@@ -5,7 +5,7 @@
 extern int yylineno;
 
 void printError(char* format, ...) {
-    printf("Linea %d: Error semantico -", yylineno);
+    printf("Linea %d: Error semantico - ", yylineno);
     va_list args;
     va_start(args, format);
     vprintf(format, args);
@@ -14,13 +14,13 @@ void printError(char* format, ...) {
 }
 
 void initBaseTypes(){
-    typeInt = typeInfo_create(); typeInt->type = t_INT;
-    typeChar = typeInfo_create(); typeChar->type = t_CHAR;
-    typeVoid = typeInfo_create(); typeVoid->type = t_VOID;
-    typeFloat = typeInfo_create(); typeFloat->type = t_FLOAT;
-    typeDouble = typeInfo_create(); typeDouble->type = t_DOUBLE;
-    typeString = typeInfo_create(); typeString->type = t_PTR; typeString->next = typeInfo_create(); typeString->next->type = t_CHAR;
-    typeError = typeInfo_create(); typeError->type = t_ERROR;
+    typeInt = typeInfo_create(t_INT);
+    typeChar = typeInfo_create(t_CHAR);
+    typeVoid = typeInfo_create(t_VOID);
+    typeFloat = typeInfo_create(t_FLOAT);
+    typeDouble = typeInfo_create(t_DOUBLE);
+    typeString = typeInfo_create(t_PTR); typeString->next = typeChar;
+    typeError = typeInfo_create(t_ERROR);
 }
 
 symtable *symtable_create(){
@@ -29,8 +29,9 @@ symtable *symtable_create(){
     return self;
 }
 
-typeInfo *typeInfo_create(){
+typeInfo *typeInfo_create(typeName type){
     typeInfo *self = malloc(sizeof(typeInfo));
+    self->type = type;
     self->next = NULL;
     self->params = NULL;
     self->isDefined = false;
@@ -52,11 +53,29 @@ void typeInfo_append(typeInfo **self, typeInfo *next){
     typeInfo_append(&((*self)->next), next);
 }
 
+bool sameParamTypes(t_list* left, t_list* right){
+    int i = 0;
+    bool _matchesParamType(void* elem){
+        symbol* param = list_get(left, i);
+        i++;
+        if(typeInfo_match(param->type, ((symbol*)elem)->type)){
+            return true;
+        }
+        return false;
+    };
+    return list_all_satisfy(right, _matchesParamType);
+}
+
 bool typeInfo_match(typeInfo *left, typeInfo *right){
     if(left == NULL && right == NULL) return true;
     if(left == NULL || right == NULL) return false;
     if(left->type != right->type) return false;
-    if(left->type == right->type) return typeInfo_match(left->next, right->next);
+    if(left->type == right->type && left->type != t_FUNC) return typeInfo_match(left->next, right->next);
+    if(left->type == right->type && left->type == t_FUNC){
+        if(list_size(left->params) == list_size(right->params)){
+            if(sameParamTypes(left->params, right->params)) return typeInfo_match(left->next, right->next);
+        }
+    }
     return false;
 }
 

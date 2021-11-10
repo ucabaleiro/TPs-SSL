@@ -38,7 +38,7 @@ typedef struct symtable {
     t_list* elems;
 } symtable;
 
-typeInfo* typeInfo_create();
+typeInfo* typeInfo_create(typeName type);
 
 void typeInfo_destroy();
 

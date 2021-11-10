@@ -139,7 +139,7 @@ primary_expression:   identifier
 
 postfix_expression:   primary_expression { $<type>$ = $<type>1; }
                     | postfix_expression '[' expression ']' {$<type>$ = reduceArray($<type>1, $<type>3);}
-                    | postfix_expression '(' argument_expression_list ')' {$<type>$ = reduceFunction($<type>1, $<list>3);}
+                    | postfix_expression '(' argument_expression_list.opt ')' {$<type>$ = reduceFunction($<type>1, $<list>3);}
                     | postfix_expression '.' identifier 
                     | postfix_expression "->" identifier 
                     | postfix_expression "++" {$<type>$ = reduceIncrement($<type>1);}
@@ -148,8 +148,12 @@ postfix_expression:   primary_expression { $<type>$ = $<type>1; }
                     | '(' type_name ')' '{' initializer_list',' '}' { /* No consideramos los literales compuestos */ }
                     ;
 
+argument_expression_list.opt: argument_expression_list { $<list>$ = $<list>1; }
+                            | /* empty */ { $<list>$ = list_create(); }
+                            ;
+
 argument_expression_list:     assignment_expression { $<list>$ = list_create(); list_add($<list>$, $<type>1); }
-                            | argument_expression_list',' assignment_expression { list_add($<list>$, $<type>3); }
+                            | argument_expression_list',' assignment_expression { $<list>$ = $<list>1; list_add($<list>$, $<type>3); }
                             ;
 
 unary_expression:     postfix_expression {$<type>$ = $<type>1;}
@@ -253,7 +257,7 @@ declaration_specifiers:   storage_class_specifier declaration_specifiers.opt {$<
                         | function_specifier declaration_specifiers.opt {$<type>$ = $<type>2;}
                         ;
 
-declaration_specifiers.opt:   /* empty */ {$<type>$ = typeInfo_create();}
+declaration_specifiers.opt:   /* empty */ {$<type>$ = typeInfo_create(t_ERROR);}
                             | declaration_specifiers {$<type>$ = $<type>1;}
                             ;
 
@@ -355,12 +359,12 @@ declarator:   pointer direct_declarator {typeInfo_append(&$<sym>2->type, $<type>
 
 direct_declarator:    identifier {$<sym>$ = symbol_create($1); $<sym>$->identifier = string_duplicate($1);}
                     | '(' declarator ')' { $<sym>$ = $<sym>2; }
-                    | direct_declarator '[' type_qualifier_list.opt assignment_expression.opt ']' {typeInfo* t = typeInfo_create(); t->type = t_ARRAY; typeInfo_append(&$<sym>1->type, t); $<sym>$ = $<sym>1;}
-                    | direct_declarator '[' STATIC type_qualifier_list.opt assignment_expression ']' {typeInfo* t = typeInfo_create(); t->type = t_ARRAY; typeInfo_append(&$<sym>1->type, t); $<sym>$ = $<sym>1;}
-                    | direct_declarator '[' type_qualifier_list STATIC assignment_expression ']' {typeInfo* t = typeInfo_create(); t->type = t_ARRAY; typeInfo_append(&$<sym>1->type, t); $<sym>$ = $<sym>1;}
-                    | direct_declarator '[' type_qualifier_list.opt '*' ']' {typeInfo* t = typeInfo_create(); t->type = t_ARRAY; typeInfo_append(&$<sym>1->type, t); $<sym>$ = $<sym>1;}
-                    | direct_declarator '(' parameter_type_list ')' {typeInfo* t = typeInfo_create(); t->type = t_FUNC; t->params = $<list>3; typeInfo_append(&$<sym>1->type, t); $<sym>$ = $<sym>1;}
-                    | direct_declarator '(' identifier_list.opt ')' {typeInfo* t = typeInfo_create(); t->type = t_FUNC; t->params = $<list>3; typeInfo_append(&$<sym>1->type, t); $<sym>$ = $<sym>1;}
+                    | direct_declarator '[' type_qualifier_list.opt assignment_expression.opt ']'       {typeInfo* t = typeInfo_create(t_ARRAY); typeInfo_append(&$<sym>1->type, t); $<sym>$ = $<sym>1;}
+                    | direct_declarator '[' STATIC type_qualifier_list.opt assignment_expression ']'    {typeInfo* t = typeInfo_create(t_ARRAY); typeInfo_append(&$<sym>1->type, t); $<sym>$ = $<sym>1;}
+                    | direct_declarator '[' type_qualifier_list STATIC assignment_expression ']'        {typeInfo* t = typeInfo_create(t_ARRAY); typeInfo_append(&$<sym>1->type, t); $<sym>$ = $<sym>1;}
+                    | direct_declarator '[' type_qualifier_list.opt '*' ']'                             {typeInfo* t = typeInfo_create(t_ARRAY); typeInfo_append(&$<sym>1->type, t); $<sym>$ = $<sym>1;}
+                    | direct_declarator '(' parameter_type_list ')' {typeInfo* t = typeInfo_create(t_FUNC); t->params = $<list>3; typeInfo_append(&$<sym>1->type, t); $<sym>$ = $<sym>1;}
+                    | direct_declarator '(' identifier_list.opt ')' {typeInfo* t = typeInfo_create(t_FUNC); t->params = $<list>3; typeInfo_append(&$<sym>1->type, t); $<sym>$ = $<sym>1;}
                     ;
 
 
@@ -374,11 +378,11 @@ type_qualifier_list.opt:      /* empty */
                             ;
 
 identifier_list.opt:      /* empty */ {$<list>$ = list_create();}
-                        | identifier_list { /* Por aca no consideramos que entre nunca, ya que es un formato obsoleto de declaracion, usamos las otras */}
+                        | identifier_list
                         ;
 
-pointer:      '*' type_qualifier_list.opt { $<type>$ = typeInfo_create(); $<type>$->type = t_PTR; }
-            | '*' type_qualifier_list.opt pointer {typeInfo* t = typeInfo_create(); t->type = t_PTR; typeInfo_append(&$<type>3, t); $<type>$ = $<type>3;}
+pointer:      '*' type_qualifier_list.opt { $<type>$ = typeInfo_create(t_PTR); }
+            | '*' type_qualifier_list.opt pointer {typeInfo* t = typeInfo_create(t_PTR); typeInfo_append(&$<type>3, t); $<type>$ = $<type>3;}
             ;
 
 type_qualifier_list:      type_qualifier
@@ -398,7 +402,7 @@ parameter_declaration:    declaration_specifiers declarator { $<sym>$ = $<sym>2;
                         ;
 
 abstract_declarator.opt:      /* empty */ { $<sym>$ = symbol_create(); }
-                            | abstract_declarator { $<sym>$ = $<sym>1; }
+                            | abstract_declarator { $<sym>$ = symbol_create(); $<sym>$->type = $<type>1; }
                             ;
 
 identifier_list:      identifier
@@ -409,20 +413,20 @@ type_name:    specifier_qualifier_list
             | specifier_qualifier_list abstract_declarator
             ;
 
-abstract_declarator:      pointer { $<sym>$ = symbol_create(); typeInfo_append(&$<sym>$->type, $<type>1); }
-                        | pointer direct_abstract_declarator { $<sym>$ = $<sym>2; typeInfo_append(&$<sym>$->type, $<type>1); }
-                        | direct_abstract_declarator { $<sym>$ = $<sym>1; }
+abstract_declarator:      pointer { $<type>$ = $<type>1; }
+                        | pointer direct_abstract_declarator { $<type>$ = $<type>2; typeInfo_append(&$<type>$, $<type>1); }
+                        | direct_abstract_declarator { $<type>$ = $<type>1; }
                         ;
 
-direct_abstract_declarator:   '(' abstract_declarator ')' { $<sym>$ = $<sym>2; }
-                            | '['  assignment_expression.opt ']' { $<sym>$ = symbol_create(); $<sym>$->type = typeInfo_create(); $<sym>$->type->type = t_ARRAY; }
-                            | '[' '*' ']' { $<sym>$ = symbol_create(); $<sym>$->type = typeInfo_create(); $<sym>$->type->type = t_ARRAY; }
-                            | '(' parameter_type_list ')' { $<sym>$ = symbol_create(); $<sym>$->type = typeInfo_create(); $<sym>$->type->type = t_FUNC; $<sym>$->type->params = $<list>2; }
-                            | '(' ')' { $<sym>$ = symbol_create(); $<sym>$->type = typeInfo_create(); $<sym>$->type->type = t_FUNC; $<sym>$->type->params = list_create(); }
-                            | direct_abstract_declarator '['  assignment_expression.opt ']' { $<sym>$ = $<sym>1; typeInfo* t = typeInfo_create(); t->type = t_ARRAY; typeInfo_append(&$<sym>$->type, t); }
-                            | direct_abstract_declarator '[' '*' ']' { $<sym>$ = $<sym>1; typeInfo* t = typeInfo_create(); t->type = t_ARRAY; typeInfo_append(&$<sym>$->type, t); }
-                            | direct_abstract_declarator '(' parameter_type_list ')' { $<sym>$ = $<sym>1; typeInfo* t = typeInfo_create(); t->type = t_FUNC; t->params = $<list>3; typeInfo_append(&$<sym>$->type, t); }
-                            | direct_abstract_declarator '(' ')' { $<sym>$ = $<sym>1; typeInfo* t = typeInfo_create(); t->type = t_FUNC; t->params = list_create(); typeInfo_append(&$<sym>$->type, t); }
+direct_abstract_declarator:   '(' abstract_declarator ')' { $<type>$ = $<type>2; }
+                            | '['  assignment_expression.opt ']'    { $<type>$ = typeInfo_create(t_ARRAY); }
+                            | '[' '*' ']'                           { $<type>$ = typeInfo_create(t_ARRAY); }
+                            | '(' parameter_type_list ')'           { $<type>$ = typeInfo_create(t_FUNC); $<type>$->params = $<list>2; }
+                            | '(' ')'                               { $<type>$ = typeInfo_create(t_FUNC); $<type>$->params = list_create(); }
+                            | direct_abstract_declarator '['  assignment_expression.opt ']' { $<type>$ = $<type>1; typeInfo* t = typeInfo_create(t_ARRAY); typeInfo_append(&$<type>$, t); }
+                            | direct_abstract_declarator '[' '*' ']'                        { $<type>$ = $<type>1; typeInfo* t = typeInfo_create(t_ARRAY); typeInfo_append(&$<type>$, t); }
+                            | direct_abstract_declarator '(' parameter_type_list ')'        { $<type>$ = $<type>1; typeInfo* t = typeInfo_create(t_FUNC); t->params = $<list>3; typeInfo_append(&$<type>$, t); }
+                            | direct_abstract_declarator '(' ')'                            { $<type>$ = $<type>1; typeInfo* t = typeInfo_create(t_FUNC); t->params = list_create(); typeInfo_append(&$<type>$, t); }
                             ;
 
 typedef_name: 't' /* Typedefs simplificados para evitar hacer un lexer hack */ ;
@@ -516,7 +520,9 @@ external_declaration:     function_definition
                         ;
 
 function_definition:      declaration_specifiers declarator declaration_list.opt compound_statement
-                        | error '}'             { yyerrok; }
+                        | error '{' { yyerrok; }
+                        | error ';' { yyerrok; }            
+                        | error '}' { yyerrok; }
                         ;
 
 declaration_list.opt:     /* empty */
