@@ -1,4 +1,4 @@
-PROCESS_NAME=../TP4
+PROCESS_NAME=../TPI
 IDIR =./include
 COMMONS_IDIR = ./so-commons-library/include
 COMMONS_LDIR = ./so-commons-library/lib
