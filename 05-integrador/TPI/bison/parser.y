@@ -269,7 +269,20 @@ init_declarator_list:     init_declarator {$<list>$ = list_create(); list_add($<
                         | init_declarator_list',' init_declarator {$<list>$ = $<list>1; list_add($<list>$, $<sym>3);}
                         ;
 
-init_declarator:      declarator {$<sym>$ = $<sym>1;}
+init_declarator:      declarator 
+                    {
+                        $<sym>$ = $<sym>1;
+                        if($<sym>$->type != NULL){
+                            if($<sym>$->type->type == t_FUNC){
+                                printf("CACA");
+                                bool isNamedParam(void* elem){
+                                    return ((symbol*)elem)->identifier != NULL;
+                                }
+                                t_list* namedParams = list_filter($<sym>$->type->params, isNamedParam);
+                                symtable_addSymbols(st, namedParams);
+                            }
+                        }
+                    }
                     | declarator '=' initializer {$<sym>$ = $<sym>1;}
                     ;
 
@@ -519,7 +532,11 @@ external_declaration:     function_definition
                         | declaration
                         ;
 
-function_definition:      declaration_specifiers declarator declaration_list.opt compound_statement
+function_definition:      declaration_specifiers declarator declaration_list.opt
+                        {
+                            typeInfo_append(&$<sym>2->type, $<type>1);
+                            symtable_functionDefinition(st, $<sym>2);
+                        } compound_statement
                         | error '{' { yyerrok; }
                         | error ';' { yyerrok; }            
                         | error '}' { yyerrok; }

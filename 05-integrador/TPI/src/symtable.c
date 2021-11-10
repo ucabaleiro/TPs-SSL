@@ -127,6 +127,59 @@ void symtable_addSymbols(symtable *self, t_list *elems){
     list_iterate(elems, _addSymbol);
 }
 
+void checkParamNames(t_list* declared, t_list* defined, symtable* self){
+    int i = 0;
+    void checkParamName(void* elem){
+        symbol* param = list_get(declared, i);
+        symbol* definedParam = (symbol*) elem;
+        i++;
+        if(definedParam->identifier == NULL){
+            printError("El parametro %i debe tener un identificador", i);
+        }
+        else if(param->identifier != NULL){
+            if(strcmp(param->identifier, definedParam->identifier)){
+                printError("El parametro %i debe tener el mismo nombre que en la declaracion", i, param->identifier);
+            }
+        }
+        else if(param->identifier == NULL){
+            symtable_addSymbol(self, definedParam);
+        }
+    };
+    return list_iterate(defined, checkParamName);
+}
+
+void symtable_functionDefinition(symtable *self, symbol* func){
+    symbol* previousDeclaration = symtable_lookup(self, func->identifier);
+    if (previousDeclaration != NULL){
+        if(!typeInfo_match(previousDeclaration->type, func->type)){
+            printError("El simbolo %s ya esta declarado como otro tipo", func->identifier);
+            return;
+        }
+        else if(previousDeclaration->type->isDefined){
+            printError("El simbolo %s corresponde a una funcion ya definida", func->identifier);
+            return;
+        }
+        else {
+             checkParamNames(previousDeclaration->type->params, func->type->params, self);
+             func->type->isDefined = true;
+             return;
+        }
+    }
+    else {
+        symtable_addSymbol(self, func);
+        func->type->isDefined = true;
+        
+        bool isNamedParam(void* elem){
+            return ((symbol*)elem)->identifier != NULL;
+        };
+        if(!list_all_satisfy(func->type->params, isNamedParam)){
+            printError("Todos los parametros de la definicion de funcion deben llevar un identificador");
+        }
+        t_list* namedParams = list_filter(func->type->params, isNamedParam);
+        symtable_addSymbols(self, namedParams);
+    }
+}
+
 // Funciones para printear por pantalla la tabla de simbolos
 
 void symtable_print(symtable *self){

@@ -62,6 +62,8 @@ void symtable_addSymbol(symtable *self, symbol *elem);
 
 void symtable_addSymbols(symtable *self, t_list *elems);
 
+void symtable_functionDefinition(symtable *self, symbol* func);
+
 void symtable_print(symtable *self);
 
 void symbol_print(symbol *self);

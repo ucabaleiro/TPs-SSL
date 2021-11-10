@@ -38,3 +38,7 @@ int sumar(int a, int b, int *c){
     *c = a+b;
     return 1; 
 }
+
+int restar(int, int resto){
+    return valor - resto;
+}
