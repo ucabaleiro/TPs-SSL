@@ -2176,6 +2176,125 @@ yyreduce:
     {(yyval.type) = reduceArray((yyvsp[(1) - (4)].type), (yyvsp[(3) - (4)].type));;}
     break;
 
+  case 14:
+
+/* Line 1455 of yacc.c  */
+#line 142 "bison/parser.y"
+    {(yyval.type) = reduceFunction((yyvsp[(1) - (4)].type), (yyvsp[(3) - (4)].list));;}
+    break;
+
+  case 21:
+
+/* Line 1455 of yacc.c  */
+#line 151 "bison/parser.y"
+    { (yyval.list) = list_create(); list_add((yyval.list), (yyvsp[(1) - (1)].type)); ;}
+    break;
+
+  case 22:
+
+/* Line 1455 of yacc.c  */
+#line 152 "bison/parser.y"
+    { list_add((yyval.list), (yyvsp[(3) - (3)].type)); ;}
+    break;
+
+  case 23:
+
+/* Line 1455 of yacc.c  */
+#line 155 "bison/parser.y"
+    {(yyval.type) = (yyvsp[(1) - (1)].type);;}
+    break;
+
+  case 35:
+
+/* Line 1455 of yacc.c  */
+#line 165 "bison/parser.y"
+    {(yyval.type) = (yyvsp[(1) - (1)].type);;}
+    break;
+
+  case 37:
+
+/* Line 1455 of yacc.c  */
+#line 169 "bison/parser.y"
+    {(yyval.type) = (yyvsp[(1) - (1)].type);;}
+    break;
+
+  case 41:
+
+/* Line 1455 of yacc.c  */
+#line 175 "bison/parser.y"
+    {(yyval.type) = (yyvsp[(1) - (1)].type);;}
+    break;
+
+  case 44:
+
+/* Line 1455 of yacc.c  */
+#line 180 "bison/parser.y"
+    {(yyval.type) = (yyvsp[(1) - (1)].type);;}
+    break;
+
+  case 47:
+
+/* Line 1455 of yacc.c  */
+#line 185 "bison/parser.y"
+    {(yyval.type) = (yyvsp[(1) - (1)].type);;}
+    break;
+
+  case 52:
+
+/* Line 1455 of yacc.c  */
+#line 193 "bison/parser.y"
+    {(yyval.type) = (yyvsp[(1) - (1)].type);;}
+    break;
+
+  case 55:
+
+/* Line 1455 of yacc.c  */
+#line 198 "bison/parser.y"
+    {(yyval.type) = (yyvsp[(1) - (1)].type);;}
+    break;
+
+  case 57:
+
+/* Line 1455 of yacc.c  */
+#line 202 "bison/parser.y"
+    {(yyval.type) = (yyvsp[(1) - (1)].type);;}
+    break;
+
+  case 59:
+
+/* Line 1455 of yacc.c  */
+#line 206 "bison/parser.y"
+    {(yyval.type) = (yyvsp[(1) - (1)].type);;}
+    break;
+
+  case 61:
+
+/* Line 1455 of yacc.c  */
+#line 210 "bison/parser.y"
+    {(yyval.type) = (yyvsp[(1) - (1)].type);;}
+    break;
+
+  case 63:
+
+/* Line 1455 of yacc.c  */
+#line 214 "bison/parser.y"
+    {(yyval.type) = (yyvsp[(1) - (1)].type);;}
+    break;
+
+  case 65:
+
+/* Line 1455 of yacc.c  */
+#line 218 "bison/parser.y"
+    {(yyval.type) = (yyvsp[(1) - (1)].type);;}
+    break;
+
+  case 67:
+
+/* Line 1455 of yacc.c  */
+#line 222 "bison/parser.y"
+    {(yyval.type) = (yyvsp[(1) - (1)].type);;}
+    break;
+
   case 83:
 
 /* Line 1455 of yacc.c  */
@@ -2661,7 +2780,7 @@ yyreduce:
 
 
 /* Line 1455 of yacc.c  */
-#line 2665 "src/parser.c"
+#line 2784 "src/parser.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);

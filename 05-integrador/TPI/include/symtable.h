@@ -44,6 +44,8 @@ void typeInfo_destroy();
 
 void typeInfo_append(typeInfo **self, typeInfo *next);
 
+bool typeInfo_match(typeInfo *left, typeInfo *right);
+
 symbol *symbol_create();
 
 void symbol_destroy(symbol *self);

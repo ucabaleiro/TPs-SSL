@@ -52,6 +52,14 @@ void typeInfo_append(typeInfo **self, typeInfo *next){
     typeInfo_append(&((*self)->next), next);
 }
 
+bool typeInfo_match(typeInfo *left, typeInfo *right){
+    if(left == NULL && right == NULL) return true;
+    if(left == NULL || right == NULL) return false;
+    if(left->type != right->type) return false;
+    if(left->type == right->type) return typeInfo_match(left->next, right->next);
+    return false;
+}
+
 void symtable_destroy(symtable *self){
     void _symbol_destroy(void *elem){
         symbol_destroy((symbol*) elem);

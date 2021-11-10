@@ -142,47 +142,50 @@ postfix_expression:   primary_expression { $<type>$ = $<type>1; }
                     | postfix_expression '(' argument_expression_list ')' {$<type>$ = reduceFunction($<type>1, $<list>3);}
                     | postfix_expression '.' identifier 
                     | postfix_expression "->" identifier 
-                    | postfix_expression "++"
-                    | postfix_expression "--"
-                    | '(' type_name ')' '{' initializer_list '}'
-                    | '(' type_name ')' '{' initializer_list',' '}'
+                    | postfix_expression "++" {$<type>$ = reduceIncrement($<type>1);}
+                    | postfix_expression "--" {$<type>$ = reduceIncrement($<type>1);}
+                    | '(' type_name ')' '{' initializer_list '}'    { /* No consideramos los literales compuestos */ }
+                    | '(' type_name ')' '{' initializer_list',' '}' { /* No consideramos los literales compuestos */ }
                     ;
 
-argument_expression_list:     assignment_expression { $<list>$ = list_create(); $<list>$ = list_add($<list>$, $<type>1); }
-                            | argument_expression_list',' assignment_expression { $<list>$ = list_add($<list>$, $<type>3); }
+argument_expression_list:     assignment_expression { $<list>$ = list_create(); list_add($<list>$, $<type>1); }
+                            | argument_expression_list',' assignment_expression { list_add($<list>$, $<type>3); }
                             ;
 
-unary_expression:     postfix_expression
-                    | "++" unary_expression
-                    | "--" unary_expression
-                    | unary_operator cast_expression
-                    | SIZEOF unary_expression
-                    | SIZEOF '('  type_name ')'
+unary_expression:     postfix_expression {$<type>$ = $<type>1;}
+                    | "++" unary_expression {$<type>$ = reduceIncrement($<type>2);}
+                    | "--" unary_expression {$<type>$ = reduceIncrement($<type>2);}
+                    | '&' cast_expression
+                    | '*' cast_expression
+                    | '+' cast_expression
+                    | '-' cast_expression
+                    | '~' cast_expression
+                    | '!' cast_expression
+                    | SIZEOF unary_expression {$<type>$ = typeInt;}
+                    | SIZEOF '('  type_name ')' {$<type>$ = typeInt;}
                     ;
 
-unary_operator: '&' | '*' | '+' | '-' | '~' | '!' ;
-
-cast_expression:      unary_expression
+cast_expression:      unary_expression {$<type>$ = $<type>1;}
                     | '(' type_name ')' cast_expression
                     ;
 
-multiplicative_expression:    cast_expression
+multiplicative_expression:    cast_expression {$<type>$ = $<type>1;}
                             | multiplicative_expression '*' cast_expression
                             | multiplicative_expression '/' cast_expression
                             | multiplicative_expression '%' cast_expression
                             ;
 
-additive_expression:      multiplicative_expression
+additive_expression:      multiplicative_expression {$<type>$ = $<type>1;}
                         | additive_expression '+' multiplicative_expression
                         | additive_expression '-' multiplicative_expression
                         ;
 
-shift_expression:     additive_expression
+shift_expression:     additive_expression {$<type>$ = $<type>1;}
                     | shift_expression "<<" additive_expression
                     | shift_expression ">>" additive_expression
                     ;
 
-relational_expression:    shift_expression
+relational_expression:    shift_expression {$<type>$ = $<type>1;}
                         | relational_expression '<' shift_expression
                         | relational_expression '>' shift_expression
                         | relational_expression "<=" shift_expression
@@ -190,36 +193,36 @@ relational_expression:    shift_expression
                         ;
                         
 
-equality_expression:      relational_expression
+equality_expression:      relational_expression {$<type>$ = $<type>1;}
                         | equality_expression "==" relational_expression
                         | equality_expression "!=" relational_expression
                         ;
 
-AND_expression:   equality_expression
+AND_expression:   equality_expression {$<type>$ = $<type>1;}
                 | AND_expression '&' equality_expression
                 ;
 
-exclusive_OR_expression:      AND_expression
+exclusive_OR_expression:      AND_expression {$<type>$ = $<type>1;}
                             | exclusive_OR_expression '^' AND_expression
                             ;
 
-inclusive_OR_expression:      exclusive_OR_expression
+inclusive_OR_expression:      exclusive_OR_expression {$<type>$ = $<type>1;}
                             | inclusive_OR_expression '|' exclusive_OR_expression
                             ;
 
-logical_AND_expression:   inclusive_OR_expression
+logical_AND_expression:   inclusive_OR_expression {$<type>$ = $<type>1;}
                         | logical_AND_expression "&&" inclusive_OR_expression
                         ;
 
-logical_OR_expression:    logical_AND_expression
+logical_OR_expression:    logical_AND_expression {$<type>$ = $<type>1;}
                         | logical_OR_expression "||" logical_AND_expression
                         ;
 
-conditional_expression:   logical_OR_expression
+conditional_expression:   logical_OR_expression {$<type>$ = $<type>1;}
                         | logical_OR_expression '?' expression ':' conditional_expression
                         ;
 
-assignment_expression:    conditional_expression
+assignment_expression:    conditional_expression {$<type>$ = $<type>1;} 
                         | unary_expression assignment_operator assignment_expression
                         ;
 
@@ -227,8 +230,8 @@ assignment_operator:      '=' | "*=" | "/=" | "%=" | "+="| "-="
                         | "<<=" | ">>=" | "&=" | "^=" | "|="
                         ;
 
-expression:   assignment_expression
-            | expression',' assignment_expression
+expression:   assignment_expression {$<type>$ = $<type>1;} 
+            | expression',' assignment_expression {$<type>$ = $<type>1;} 
             ;
 
 constant_expression: conditional_expression ;
