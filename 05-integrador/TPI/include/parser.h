@@ -35,7 +35,7 @@
 /* "%code requires" blocks.  */
 
 /* Line 1676 of yacc.c  */
-#line 21 "bison/parser.y"
+#line 23 "bison/parser.y"
 
     #include <stdio.h>
     #include <list.h>
@@ -111,11 +111,11 @@
      ASIGN_BITWISE_AND = 313,
      ASIGN_BITWISE_XOR = 314,
      ASIGN_BITWISE_OR = 315,
-     IDENTIFIER = 316,
+     INT_CONST = 316,
      CHAR_CONST = 317,
-     INT_CONST = 318,
-     REAL_CONST = 319,
-     STRING_LITERAL = 320,
+     REAL_CONST = 318,
+     STRING_LITERAL = 319,
+     IDENTIFIER = 320,
      IFX = 321
    };
 #endif
@@ -127,7 +127,7 @@ typedef union YYSTYPE
 {
 
 /* Line 1676 of yacc.c  */
-#line 29 "bison/parser.y"
+#line 31 "bison/parser.y"
 
     char* strval;
     typeInfo* type;

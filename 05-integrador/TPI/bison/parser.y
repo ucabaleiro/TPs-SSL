@@ -6,6 +6,8 @@
 #include <stringso.h>
 #include <list.h>
 #include "symtable.h"
+#include "operationCheck.h"
+
 int yylex(void);
 int yyerror(const char *s);
 extern FILE* yyin;
@@ -94,15 +96,13 @@ symtable* st;
 %token ASIGN_BITWISE_XOR "^="
 %token ASIGN_BITWISE_OR "|="
 
-%token <strval> IDENTIFIER
-%token <tval> CHAR_CONST
-%token <tval> INT_CONST
-%token <tval> REAL_CONST
-%token <tval> STRING_LITERAL
+%token INT_CONST
+%token CHAR_CONST
+%token REAL_CONST
+%token STRING_LITERAL
 
+%token <strval> IDENTIFIER
 %nterm <strval> identifier
-%nterm <tval> constant
-%nterm <tval> string_literal
 
 %nonassoc IFX
 %nonassoc ELSE
@@ -111,36 +111,45 @@ symtable* st;
 
 %%
 
-identifier: IDENTIFIER {$$ = $1;} ;
+identifier: IDENTIFIER { $$ = $1; } ;
 
-constant:     CHAR_CONST
-            | INT_CONST
-            | REAL_CONST
+constant:     CHAR_CONST { $<type>$ = typeChar;}
+            | INT_CONST { $<type>$ = typeInt; }
+            | REAL_CONST { $<type>$ = typeDouble; }
             ;
 
-string_literal: STRING_LITERAL ;
+string_literal: STRING_LITERAL {$<type>$ = typeString};
 
 enumeration_constant: identifier ;
 
-primary_expression:   identifier
-                    | constant
-                    | string_literal
-                    | '(' expression ')'
+primary_expression:   identifier 
+                    {
+                        if(symtable_isPresent(st, $<strval>1)){
+                            $<type>$ = symtable_lookup(st, $1)->type;
+                        }
+                        else {
+                            $<type>$ = typeError;
+                            printError("El simbolo %s no fue declarado", $<strval>1);
+                        }
+                    }
+                    | constant { $<type>$ = $<type>1; }
+                    | string_literal { $<type>$ = $<type>1; }
+                    | '(' expression ')' { $<type>$ = $<type>2; }
                     ;
 
-postfix_expression:   primary_expression
-                    | postfix_expression '[' expression ']'
-                    | postfix_expression '(' argument_expression_list ')'
-                    | postfix_expression '.' identifier
-                    | postfix_expression "->" identifier
+postfix_expression:   primary_expression { $<type>$ = $<type>1; }
+                    | postfix_expression '[' expression ']' {$<type>$ = reduceArray($<type>1, $<type>3);}
+                    | postfix_expression '(' argument_expression_list ')' {$<type>$ = reduceFunction($<type>1, $<list>3);}
+                    | postfix_expression '.' identifier 
+                    | postfix_expression "->" identifier 
                     | postfix_expression "++"
                     | postfix_expression "--"
                     | '(' type_name ')' '{' initializer_list '}'
                     | '(' type_name ')' '{' initializer_list',' '}'
                     ;
 
-argument_expression_list:     assignment_expression
-                            | argument_expression_list',' assignment_expression
+argument_expression_list:     assignment_expression { $<list>$ = list_create(); $<list>$ = list_add($<list>$, $<type>1); }
+                            | argument_expression_list',' assignment_expression { $<list>$ = list_add($<list>$, $<type>3); }
                             ;
 
 unary_expression:     postfix_expression
@@ -521,7 +530,9 @@ int main(int argc, char *argv[]) {
     yydebug = 0;
 	yyin=fopen(argv[1],"r");
 
+    initBaseTypes();
     st = symtable_create();
+
    	yyparse();
 	
     symtable_print(st);
