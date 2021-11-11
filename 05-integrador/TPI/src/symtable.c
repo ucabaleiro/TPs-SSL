@@ -5,7 +5,7 @@
 extern int yylineno;
 
 void printError(char* format, ...) {
-    printf("Linea %d: Error semantico - ", yylineno);
+    printf("\nLinea %d: Error semantico - ", yylineno);
     va_list args;
     va_start(args, format);
     vprintf(format, args);
@@ -210,10 +210,10 @@ void typeInfo_print(typeInfo *self){
     };
     if(self->type == t_FUNC){
         if(list_is_empty(self->params)){
-            printf("sin argumentos, ");
+            printf("sin parametros, ");
         }
         else{
-            printf("con argumentos de tipo: ");
+            printf("con parametros de tipo: ");
             list_iterate(self->params, _parameterPrint);
         }
         printf("y retorno de tipo: ");

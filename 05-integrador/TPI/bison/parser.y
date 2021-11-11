@@ -19,14 +19,6 @@ symtable* st;
 %debug
 %error-verbose
 
-%code requires
-{
-    #include <stdio.h>
-    #include <list.h>
-    #include "symtable.h"
-    #include <stringso.h>
-}
-
 %union
 {
     char* strval;
@@ -274,7 +266,6 @@ init_declarator:      declarator
                         $<sym>$ = $<sym>1;
                         if($<sym>$->type != NULL){
                             if($<sym>$->type->type == t_FUNC){
-                                printf("CACA");
                                 bool isNamedParam(void* elem){
                                     return ((symbol*)elem)->identifier != NULL;
                                 }
@@ -403,7 +394,7 @@ type_qualifier_list:      type_qualifier
                         ;
 
 parameter_type_list:      parameter_list {$<list>$ = $<list>1;}
-                        | parameter_list ',' "..." {$<list>$ = $<list>1; /* TODO: Por ahora ignoramos variargs */ }
+                        | parameter_list ',' "..." {$<list>$ = $<list>1; /* TODO: Por ahora ignoramos los argumentos variadicos */ }
                         ;
 
 parameter_list:   parameter_declaration {$<list>$ = list_create(); list_add($<list>$, $<sym>1);}
@@ -469,19 +460,19 @@ designator:   '[' constant_expression ']'
 
 statement:    labeled_statement     
             | compound_statement    
-            | expression_statement  { printf("Linea %i: Sentencia de expresion\n", yylineno); }
+            | expression_statement  
             | selection_statement   
             | iteration_statement   
-            | jump_statement        { printf("Linea %i: Sentencia de salto\n", yylineno); }
+            | jump_statement        
             | error ';'             { yyerrok; }
             ;
 
-labeled_statement:    identifier ':' { printf("Linea %i: Sentencia etiquetada\n", yylineno); } statement
-                    | CASE { printf("Linea %i: Sentencia etiquetada\n", yylineno); } constant_expression ':' statement
-                    | DEFAULT { printf("Linea %i: Sentencia etiquetada\n", yylineno); } ':' statement
+labeled_statement:    identifier ':' statement
+                    | CASE constant_expression ':' statement
+                    | DEFAULT ':' statement
                     ;
 
-compound_statement: '{' { printf("Linea %i: Sentencia Compuesta\n", yylineno); } block_item_list.opt '}' ;
+compound_statement: '{' block_item_list.opt '}' ;
 
 block_item_list.opt:      /* empty */
                         | block_item_list
@@ -501,17 +492,17 @@ expression.opt:   /* empty */
                 | expression
                 ;
 
-selection_statement:      IF { printf("Linea %i: Sentencia de seleccion\n", yylineno); } if_body
-                        | SWITCH { printf("Linea %i: Sentencia de seleccion\n", yylineno); } '(' expression ')' statement
+selection_statement:      IF if_body
+                        | SWITCH '(' expression ')' statement
                         ;
 
 if_body:      '(' expression ')' statement %prec IFX
             | '(' expression ')' statement ELSE statement
             ;
 
-iteration_statement:      WHILE { printf("Linea %i: Sentencia de iteracion\n", yylineno); } '(' expression ')' statement
-                        | DO { printf("Linea %i: Sentencia de iteracion\n", yylineno); } statement WHILE '(' expression ')' ';'
-                        | FOR { printf("Linea %i: Sentencia de iteracion\n", yylineno); } for_body
+iteration_statement:      WHILE '(' expression ')' statement
+                        | DO statement WHILE '(' expression ')' ';'
+                        | FOR for_body
                         ;
 
 for_body:     '(' expression.opt ';' expression.opt ';' expression.opt ')' statement
