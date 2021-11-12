@@ -151,79 +151,85 @@ argument_expression_list:     assignment_expression { $<list>$ = list_create(); 
 unary_expression:     postfix_expression {$<type>$ = $<type>1;}
                     | "++" unary_expression {$<type>$ = reduceIncrement($<type>2);}
                     | "--" unary_expression {$<type>$ = reduceIncrement($<type>2);}
-                    | '&' cast_expression
-                    | '*' cast_expression
-                    | '+' cast_expression
-                    | '-' cast_expression
-                    | '~' cast_expression
-                    | '!' cast_expression
-                    | SIZEOF unary_expression {$<type>$ = typeInt;}
-                    | SIZEOF '('  type_name ')' {$<type>$ = typeInt;}
+                    | '&' cast_expression { /* No consideramos el operador de referencia */ }
+                    | '*' cast_expression {$<type>$ = reduceDereference($<type>1)}
+                    | '+' cast_expression {$<type>$ = reduceUnaryPlus($<type>2)}
+                    | '-' cast_expression {$<type>$ = reduceUnaryPlus($<type>2)}
+                    | '~' cast_expression {$<type>$ = reduceBitwiseNot($<type>2)}
+                    | '!' cast_expression {$<type>$ = reduceNot($<type>2)}
+                    | SIZEOF unary_expression {$<type>$ = reduceSizeoOf($<type>2);}
+                    | SIZEOF '('  type_name ')' {$<type>$ = reduceSizeOf($<type>2);}
                     ;
 
 cast_expression:      unary_expression {$<type>$ = $<type>1;}
-                    | '(' type_name ')' cast_expression
+                    | '(' type_name ')' cast_expression {$<type>$ = reduceCast($<type>2, $<type>4)}
                     ;
 
 multiplicative_expression:    cast_expression {$<type>$ = $<type>1;}
-                            | multiplicative_expression '*' cast_expression
-                            | multiplicative_expression '/' cast_expression
-                            | multiplicative_expression '%' cast_expression
+                            | multiplicative_expression '*' cast_expression { $<type>$ = reduceProduct($<type>1, $<type>3); }
+                            | multiplicative_expression '/' cast_expression { $<type>$ = reduceProduct($<type>1, $<type>3); }
+                            | multiplicative_expression '%' cast_expression { $<type>$ = reduceRemainder($<type>1, $<type>3); }
                             ;
 
 additive_expression:      multiplicative_expression {$<type>$ = $<type>1;}
-                        | additive_expression '+' multiplicative_expression
-                        | additive_expression '-' multiplicative_expression
+                        | additive_expression '+' multiplicative_expression { $<type>$ = reduceSum($<type>1, $<type>3); }
+                        | additive_expression '-' multiplicative_expression { $<type>$ = reduceSum($<type>1, $<type>3); }
                         ;
 
 shift_expression:     additive_expression {$<type>$ = $<type>1;}
-                    | shift_expression "<<" additive_expression
-                    | shift_expression ">>" additive_expression
+                    | shift_expression "<<" additive_expression {$<type>$ = reduceBitwise($<type>1, $<type>3);}
+                    | shift_expression ">>" additive_expression {$<type>$ = reduceBitwise($<type>1, $<type>3);}
                     ;
 
 relational_expression:    shift_expression {$<type>$ = $<type>1;}
-                        | relational_expression '<' shift_expression
-                        | relational_expression '>' shift_expression
-                        | relational_expression "<=" shift_expression
-                        | relational_expression ">=" shift_expression
+                        | relational_expression '<' shift_expression { $<type>$ = reduceRelational($<type>1, $<type>3); }
+                        | relational_expression '>' shift_expression { $<type>$ = reduceRelational($<type>1, $<type>3); }
+                        | relational_expression "<=" shift_expression { $<type>$ = reduceRelational($<type>1, $<type>3); }
+                        | relational_expression ">=" shift_expression { $<type>$ = reduceRelational($<type>1, $<type>3); }
                         ;
                         
 
 equality_expression:      relational_expression {$<type>$ = $<type>1;}
-                        | equality_expression "==" relational_expression
-                        | equality_expression "!=" relational_expression
+                        | equality_expression "==" relational_expression { $<type>$ = reduceEquality($<type>1, $<type>3); }
+                        | equality_expression "!=" relational_expression { $<type>$ = reduceEquality($<type>1, $<type>3); }
                         ;
 
 AND_expression:   equality_expression {$<type>$ = $<type>1;}
-                | AND_expression '&' equality_expression
+                | AND_expression '&' equality_expression { $<type>$ = reduceBitwise($<type>1, $<type>3); }
                 ;
 
 exclusive_OR_expression:      AND_expression {$<type>$ = $<type>1;}
-                            | exclusive_OR_expression '^' AND_expression
+                            | exclusive_OR_expression '^' AND_expression { $<type>$ = reduceBitwise($<type>1, $<type>3); }
                             ;
 
 inclusive_OR_expression:      exclusive_OR_expression {$<type>$ = $<type>1;}
-                            | inclusive_OR_expression '|' exclusive_OR_expression
+                            | inclusive_OR_expression '|' exclusive_OR_expression { $<type>$ = reduceBitwise($<type>1, $<type>3); }
                             ;
 
 logical_AND_expression:   inclusive_OR_expression {$<type>$ = $<type>1;}
-                        | logical_AND_expression "&&" inclusive_OR_expression
+                        | logical_AND_expression "&&" inclusive_OR_expression { $<type>$ = reduceLogical($<type>1, $<type>3); }
                         ;
 
 logical_OR_expression:    logical_AND_expression {$<type>$ = $<type>1;}
-                        | logical_OR_expression "||" logical_AND_expression
+                        | logical_OR_expression "||" logical_AND_expression { $<type>$ = reduceLogical($<type>1, $<type>3); }
                         ;
 
 conditional_expression:   logical_OR_expression {$<type>$ = $<type>1;}
-                        | logical_OR_expression '?' expression ':' conditional_expression
+                        | logical_OR_expression '?' expression ':' conditional_expression { $<type>$ = reduceConditional($<type>1, $<type>3, $<type>5); }
                         ;
 
 assignment_expression:    conditional_expression {$<type>$ = $<type>1;} 
-                        | unary_expression assignment_operator assignment_expression
-                        ;
-
-assignment_operator:      '=' | "*=" | "/=" | "%=" | "+="| "-=" 
-                        | "<<=" | ">>=" | "&=" | "^=" | "|="
+                        | unary_expression '=' assignment_expression    {$<type>$ = reduceAssignment($<type>1, $<type>3);}
+                        | unary_expression "*=" assignment_expression   {$<type>$ = reduceProduct($<type>1, $<type>3);}
+                        | unary_expression "/=" assignment_expression   {$<type>$ = reduceProduct($<type>1, $<type>3);}
+                        | unary_expression "%=" assignment_expression   {$<type>$ = reduceRemainder($<type>1, $<type>3);}
+                        | unary_expression "+=" assignment_expression   {$<type>$ = reduceSum($<type>1, $<type>3);}
+                        | unary_expression "-=" assignment_expression   {$<type>$ = reduceSum($<type>1, $<type>3);}
+                        | unary_expression "<<=" assignment_expression  {$<type>$ = reduceBitwise($<type>1, $<type>3);}
+                        | unary_expression ">>=" assignment_expression  {$<type>$ = reduceBitwise($<type>1, $<type>3);}
+                        | unary_expression "&=" assignment_expression   {$<type>$ = reduceBitwise($<type>1, $<type>3);}
+                        | unary_expression "^=" assignment_expression   {$<type>$ = reduceBitwise($<type>1, $<type>3);}
+                        | unary_expression "|=" assignment_expression   {$<type>$ = reduceBitwise($<type>1, $<type>3);}
                         ;
 
 expression:   assignment_expression {$<type>$ = $<type>1;} 
@@ -313,12 +319,12 @@ struct_declaration_list:      struct_declaration
 
 struct_declaration:   specifier_qualifier_list struct_declarator_list ';' ;
 
-specifier_qualifier_list:     type_specifier specifier_qualifier_list.opt
-                            | type_qualifier specifier_qualifier_list.opt
+specifier_qualifier_list:     type_specifier specifier_qualifier_list.opt {$<type>$ = $<type>2; $<type>$->type = $<typeName>1;}
+                            | type_qualifier specifier_qualifier_list.opt {$<type>$ = $<type>2;}
                             ;
 
-specifier_qualifier_list.opt:     /* empty */
-                                | specifier_qualifier_list
+specifier_qualifier_list.opt:     /* empty */ {$<type>$ = typeInfo_create(t_ERROR);}
+                                | specifier_qualifier_list {$<type>$ = $<type>1;}
                                 ;
 
 struct_declarator_list:   struct_declarator
@@ -413,8 +419,8 @@ identifier_list:      identifier
                     | identifier_list ',' identifier
                     ;
 
-type_name:    specifier_qualifier_list
-            | specifier_qualifier_list abstract_declarator
+type_name:    specifier_qualifier_list {$<type>$ = $<type>1;}
+            | specifier_qualifier_list abstract_declarator {typeInfo_append(&$<type>2, $<type>1); $<type>$ = $<type>2;}
             ;
 
 abstract_declarator:      pointer { $<type>$ = $<type>1; }
