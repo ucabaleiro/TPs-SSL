@@ -559,6 +559,6 @@ int main(int argc, char *argv[]) {
 }
 
 int yyerror(const char *msg) {
-	printf("Linea %d: %s\n",yylineno,msg);
+	printf("\nLinea %d: %s\n",yylineno,msg);
 	return 0; 
 }

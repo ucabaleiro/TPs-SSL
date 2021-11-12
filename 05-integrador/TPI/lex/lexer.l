@@ -154,7 +154,7 @@ comentario_ml               "/*"([^*]|(\*+[^*/]))*"*"+"/"
 {comentario_sl}             {}
 {comentario_ml}             {}
 
-.                           {printf("Linea %i: Error Lexico \"%s\"\n", yylineno, yytext);}
+.                           {printf("\nLinea %i: Error Lexico \"%s\"\n", yylineno, yytext);}
 
 %%
 

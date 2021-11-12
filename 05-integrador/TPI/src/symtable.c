@@ -192,7 +192,7 @@ void symtable_print(symtable *self){
 }
 
 void symbol_print(symbol *self){
-    printf("%s: ", self->identifier);
+    printf("\n%s: ", self->identifier);
     typeInfo_print(self->type);
     printf("\n");
 }

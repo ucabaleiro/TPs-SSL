@@ -1530,7 +1530,7 @@ YY_RULE_SETUP
 case 93:
 YY_RULE_SETUP
 #line 157 "lex/lexer.l"
-{printf("Linea %i: Error Lexico \"%s\"\n", yylineno, yytext);}
+{printf("\nLinea %i: Error Lexico \"%s\"\n", yylineno, yytext);}
 	YY_BREAK
 case 94:
 YY_RULE_SETUP
