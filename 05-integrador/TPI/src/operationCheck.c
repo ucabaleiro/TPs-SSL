@@ -45,6 +45,10 @@ typeInfo* maxByRank(typeInfo* left, typeInfo* right) {
     return right;
 }
 
+bool areCompatiblePointers(typeInfo* left, typeInfo* right) {
+    return left->type == t_PTR && right->type == t_PTR && typeInfo_match(left->next, right->next);
+}
+
 typeInfo* reduceArray(typeInfo* left, typeInfo* right){
     if(checkTypeError(left) || checkTypeError(right)) return typeError;
 
@@ -105,53 +109,29 @@ typeInfo* reduceFunction(typeInfo* func, t_list* argTypes){
 
 typeInfo* reduceIncrement(typeInfo* exp){
     if(checkTypeError(exp)) return typeError;
-    if(isScalar(exp)) {
-        return exp;
-    }
-    else {
-        printError("La expresion operando de un ++ o -- debe ser de tipo escalar (enteros, flotantes o punteros)");
-        return typeError;
-    }
+    if(isScalar(exp)) return exp;
+    printError("La expresion operando de un ++ o -- debe ser de tipo escalar (enteros, flotantes o punteros)");
+    return typeError;
 }
 
-typeInfo* reduceDereferece(typeInfo* exp){
+typeInfo* reduceDereference(typeInfo* exp){
     if(checkTypeError(exp)) return typeError;
-    if(exp->type == t_PTR) {
-        return exp->next;
-    }
-    else {
-        printError("El operando de un operador de indireccion (*) debe ser de tipo puntero");
-        return typeError;
-    }
+    if(exp->type == t_PTR) return exp->next;
+    printError("El operando de un operador de indireccion (*) debe ser de tipo puntero");
+    return typeError;
 }
 
 typeInfo* reduceUnaryPlus(typeInfo* exp){
     if(checkTypeError(exp)) return typeError;
-    if(isArithmetic(exp)) {
-        return exp;
-    }
-    else {
-        printError("El operando de un + o un - unario debe ser de tipo aritmetico");
-        return typeError;
-    }
+    if(isArithmetic(exp)) return exp;
+    printError("El operando de un + o un - unario debe ser de tipo aritmetico");
+    return typeError;
 }
 
 typeInfo* reduceBitwiseNot(typeInfo* exp){
     if(checkTypeError(exp)) return typeError;
-    if(isInteger(exp)) {
-        return exp;
-    }
-    else {
-        printError("El operando de la negacion bit a bit (~) debe ser de tipo entero");
-        return typeError;
-    }
-}
-
-typeInfo* reduceBitwise(typeInfo* left, typeInfo* right){
-    if(checkTypeError(left) || checkTypeError(right)) return typeError;
-    if(isInteger(left) && isInteger(right)) return typeInt;
-    
-    printError("Ambos operandos de las operaciones binarias bit a bit deben ser de tipo entero.");
+    if(isInteger(exp)) return exp;
+    printError("El operando de la negacion bit a bit (~) debe ser de tipo entero");
     return typeError;
 }
 
@@ -165,14 +145,14 @@ typeInfo* reduceLogicalNot(typeInfo* exp){
 typeInfo* reduceSizeOf(typeInfo* exp){
     if(checkTypeError(exp)) return typeError;
     if(exp->type == t_FUNC || exp->type == t_VOID){
-        printError("El operando de sizeof no puede ser de tipo void ni funcion.")
+        printError("El operando de sizeof no puede ser de tipo void ni funcion.");
         return typeError;
     } 
     return typeInt;
 }
 
 typeInfo* reduceCast(typeInfo* type, typeInfo* exp){
-    if(checkTypeError(left) || checkTypeError(right)) return typeError;
+    if(checkTypeError(type) || checkTypeError(exp)) return typeError;
     if (isScalar(exp) && (type->type == t_VOID || isScalar(type))) return type;
     printError("El operando de un casteo debe ser de tipo escalar y el nuevo tipo debe ser de tipo escalar o void.");
     return typeError;
@@ -193,30 +173,80 @@ typeInfo* reduceRemainder(typeInfo* left, typeInfo* right){
     return typeError;
 }
 
+typeInfo* reduceSum(typeInfo* left, typeInfo* right){
+    if(checkTypeError(left) || checkTypeError(right)) return typeError;
+    if(isArithmetic(left) && isArithmetic(right)) return maxByRank(left, right);
+    if(isInteger(left) && right->type == t_PTR) return right;
+    if(isInteger(right) && left->type == t_PTR) return left;
+
+    printError("Solo se pueden hacer sumas aritmetico-aritmetico o puntero-entero.");
+    return typeError;
+}
+
+typeInfo* reduceSubtract(typeInfo* left, typeInfo* right){
+    if(checkTypeError(left) || checkTypeError(right)) return typeError;
+    if(isArithmetic(left) && isArithmetic(right)) return maxByRank(left, right);
+    if(isInteger(right) && left->type == t_PTR) return left;
+    if(left->type == t_PTR && right->type == t_PTR) return left;
+
+    printError("Solo se pueden hacer restas aritmetico-aritmetico, puntero-puntero (compatibles), puntero-entero");
+    return typeError;
+}
+
 typeInfo* reduceRelational(typeInfo* left, typeInfo* right){
     if(checkTypeError(left) || checkTypeError(right)) return typeError;
     if(isReal(left) && isReal(right)) return typeInt;
-    if(left->type == t_PTR && right->type == t_PTR) return typeInt;
-    printError("Los operandos de una inecuacion (<, >, <=, >=) deben ser tanto ambos de tipo real o ambos de tipo puntero.");
+    if(areCompatiblePointers(left, right)) return typeInt;
+    printError("Los operandos de una inecuacion (<, >, <=, >=) deben ser tanto ambos de tipo real o ambos de tipo puntero a tipos compatibles.");
+    return typeError;
+}
+
+typeInfo* reduceEquality(typeInfo* left, typeInfo* right){
+    if(checkTypeError(left) || checkTypeError(right)) return typeError;
+    if(isArithmetic(left) && isArithmetic(right)) return typeInt;
+    if(areCompatiblePointers(left, right)) return typeInt;
+    if(left->type == t_PTR && right->type == t_PTR && right->next->type == t_VOID) return left;
+    if(left->type == t_PTR && left->next->type == t_VOID && right->type == t_PTR) return right;
+    printError("Los operandos de una inecuacion (==, !=) deben ser tanto ambos de tipo aritmeticom, ambos de tipo puntero a tipos compatibles, o uno de ellos puntero a void.");
+    return typeError;
+}
+
+typeInfo* reduceBitwise(typeInfo* left, typeInfo* right){
+    if(checkTypeError(left) || checkTypeError(right)) return typeError;
+    if(isInteger(left) && isInteger(right)) return typeInt;
+    
+    printError("Ambos operandos de las operaciones binarias bit a bit deben ser de tipo entero.");
     return typeError;
 }
 
 typeInfo* reduceLogical(typeInfo* left, typeInfo* right){
     if(checkTypeError(left) || checkTypeError(right)) return typeError;
     if(isScalar(right) && isScalar(left)) return typeInt;
-    typeError("En operaciones logicas ambos operadores deben ser de tipo escalar");
+    printError("Ambos operandos de un operador binario logico deben ser de tipo escalar");
     return typeError;
 }
 
 typeInfo* reduceConditional(typeInfo* first, typeInfo* second, typeInfo* third){
     if(checkTypeError(first) || checkTypeError(second) || checkTypeError(third)) return typeError;
-    if(! isScalar(first)){
-        printError("En el operador ternario, el primer operando ee ser de tipo escalar");
+    if(!isScalar(first)){
+        printError("El primer operando del operador ternario (a izquierda del ?) debe ser de tipo escalar");
         return typeError;
     }
     if(isArithmetic(second) && isArithmetic(third)) return maxByRank(second, third);
     if(second->type == t_VOID && third->type == t_VOID) return typeVoid;
-    if(second->type == t_PTR && third->type == t_PTR) return ;
+    if(areCompatiblePointers(second, third)) return second;
+    if(second->type == t_PTR && third->type == t_PTR && third->next->type == t_VOID) return second;
+    if(second->type == t_PTR && second->next->type == t_VOID && third->type == t_PTR) return third;
+    printError("Los ultimos dos operandos del operador ternario (a derecha del ?) deben ser tanto ambos de tipo aritmetico, ambos de tipo puntero a tipos compatibles, o uno de ellos puntero a void.");
+    return typeError;
+}
 
-
+typeInfo* reduceAssignment(typeInfo* left, typeInfo* right){
+    if(checkTypeError(left) || checkTypeError(right)) return typeError;
+    if(isArithmetic(left) && isArithmetic(right)) return maxByRank(left, right);
+    if(areCompatiblePointers(left, right)) return left;
+    if(left->type == t_PTR && right->type == t_PTR && right->next->type == t_VOID) return left;
+    if(left->type == t_PTR && left->next->type == t_VOID && right->type == t_PTR) return right;
+    printError("Los operandos de una asignacion (=) deben ser tanto ambos de tipo aritmetico, ambos de tipo puntero a tipos compatibles, o uno de ellos puntero a void.");
+    return typeError;
 }

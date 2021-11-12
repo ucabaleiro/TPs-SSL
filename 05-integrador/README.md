@@ -2,7 +2,7 @@ Todas las definiciones y expresiones regulares usadas en este TP son derivadas d
 
 # Consideraciones Importantes
 El trabajo práctico cuenta con una gramática de bison capaz de reconocer **`sintacticamente`** correctamente toda la gramática de C (hasta donde alcanzaron nuestras pruebas), a excepción de los siguientes casos:
-* **`Typedefs`**: Por como funcionan bison y flex, y por como la BNF de C plantea el uso de typedefs, debiamos optar por una solucion rebuscada, o cortar por lo sano e ignorarlos. fuimos por la segunda.
+* **`Typedefs`**: Por como funcionan bison y flex, y por como la BNF de C plantea el uso de typedefs, debiamos optar por una solucion rebuscada, o cortar por lo sano e ignorarlos. Fuimos por la segunda.
 
 El programa genera un reporte por pantalla con todas las declaraciones de variables y funciones, sentencias encontradas y errores lexicos y sintacticos.
 

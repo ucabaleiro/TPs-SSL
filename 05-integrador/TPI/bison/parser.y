@@ -114,8 +114,8 @@ string_literal: STRING_LITERAL {$<type>$ = typeString};
 
 enumeration_constant: identifier ;
 
-primary_expression:   identifier 
-                    {
+primary_expression:   identifier
+                    {   
                         if(symtable_isPresent(st, $<strval>1)){
                             $<type>$ = symtable_lookup(st, $1)->type;
                         }
@@ -152,17 +152,17 @@ unary_expression:     postfix_expression {$<type>$ = $<type>1;}
                     | "++" unary_expression {$<type>$ = reduceIncrement($<type>2);}
                     | "--" unary_expression {$<type>$ = reduceIncrement($<type>2);}
                     | '&' cast_expression { /* No consideramos el operador de referencia */ }
-                    | '*' cast_expression {$<type>$ = reduceDereference($<type>1)}
-                    | '+' cast_expression {$<type>$ = reduceUnaryPlus($<type>2)}
-                    | '-' cast_expression {$<type>$ = reduceUnaryPlus($<type>2)}
-                    | '~' cast_expression {$<type>$ = reduceBitwiseNot($<type>2)}
-                    | '!' cast_expression {$<type>$ = reduceNot($<type>2)}
-                    | SIZEOF unary_expression {$<type>$ = reduceSizeoOf($<type>2);}
+                    | '*' cast_expression {$<type>$ = reduceDereference($<type>2);}
+                    | '+' cast_expression {$<type>$ = reduceUnaryPlus($<type>2);}
+                    | '-' cast_expression {$<type>$ = reduceUnaryPlus($<type>2);}
+                    | '~' cast_expression {$<type>$ = reduceBitwiseNot($<type>2);}
+                    | '!' cast_expression {$<type>$ = reduceLogicalNot($<type>2);}
+                    | SIZEOF unary_expression {$<type>$ = reduceSizeOf($<type>2);}
                     | SIZEOF '('  type_name ')' {$<type>$ = reduceSizeOf($<type>2);}
                     ;
 
 cast_expression:      unary_expression {$<type>$ = $<type>1;}
-                    | '(' type_name ')' cast_expression {$<type>$ = reduceCast($<type>2, $<type>4)}
+                    | '(' type_name ')' cast_expression {$<type>$ = reduceCast($<type>2, $<type>4);}
                     ;
 
 multiplicative_expression:    cast_expression {$<type>$ = $<type>1;}
@@ -173,7 +173,7 @@ multiplicative_expression:    cast_expression {$<type>$ = $<type>1;}
 
 additive_expression:      multiplicative_expression {$<type>$ = $<type>1;}
                         | additive_expression '+' multiplicative_expression { $<type>$ = reduceSum($<type>1, $<type>3); }
-                        | additive_expression '-' multiplicative_expression { $<type>$ = reduceSum($<type>1, $<type>3); }
+                        | additive_expression '-' multiplicative_expression { $<type>$ = reduceSubtract($<type>1, $<type>3); }
                         ;
 
 shift_expression:     additive_expression {$<type>$ = $<type>1;}
@@ -224,7 +224,7 @@ assignment_expression:    conditional_expression {$<type>$ = $<type>1;}
                         | unary_expression "/=" assignment_expression   {$<type>$ = reduceProduct($<type>1, $<type>3);}
                         | unary_expression "%=" assignment_expression   {$<type>$ = reduceRemainder($<type>1, $<type>3);}
                         | unary_expression "+=" assignment_expression   {$<type>$ = reduceSum($<type>1, $<type>3);}
-                        | unary_expression "-=" assignment_expression   {$<type>$ = reduceSum($<type>1, $<type>3);}
+                        | unary_expression "-=" assignment_expression   {$<type>$ = reduceSubtract($<type>1, $<type>3);}
                         | unary_expression "<<=" assignment_expression  {$<type>$ = reduceBitwise($<type>1, $<type>3);}
                         | unary_expression ">>=" assignment_expression  {$<type>$ = reduceBitwise($<type>1, $<type>3);}
                         | unary_expression "&=" assignment_expression   {$<type>$ = reduceBitwise($<type>1, $<type>3);}
