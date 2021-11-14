@@ -183,12 +183,22 @@ void symtable_functionDefinition(symtable *self, symbol* func){
 // Funciones para printear por pantalla la tabla de simbolos
 
 void symtable_print(symtable *self){
+    bool isFunc(void* elem){
+        return ((symbol*)elem)->type->type == t_FUNC;
+    };
+    bool isVar(void* elem){
+        return ((symbol*)elem)->type->type != t_FUNC;
+    };
     void _symbol_print(void *elem){
         symbol_print((symbol*) elem);
     };
-    printf("\nDump de Tabla de Simbolos:\n");
-    printf("-------------------------\n");
-    list_iterate(self->elems, _symbol_print);
+    printf("\nVariables declaradas:\n");
+    printf("---------------------\n");
+    list_iterate(list_filter(self->elems, isVar), _symbol_print);
+    printf("\nFunciones declaradas:\n");
+    printf("---------------------\n");
+    list_iterate(list_filter(self->elems, isFunc), _symbol_print);
+
 }
 
 void symbol_print(symbol *self){

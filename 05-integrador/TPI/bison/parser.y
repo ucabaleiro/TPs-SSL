@@ -556,7 +556,9 @@ int main(int argc, char *argv[]) {
     initBaseTypes();
     st = symtable_create();
 
+    printf("\n~~~~~ INICIO DETECCION DE ERRORES ~~~~~\n");
    	yyparse();
+    printf("\n~~~~~ FIN DE DETECCION DE ERRORES ~~~~~\n");
 	
     symtable_print(st);
 
