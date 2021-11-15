@@ -132,8 +132,8 @@ primary_expression:   identifier
 postfix_expression:   primary_expression { $<type>$ = $<type>1; }
                     | postfix_expression '[' expression ']' {$<type>$ = reduceArray($<type>1, $<type>3);}
                     | postfix_expression '(' argument_expression_list.opt ')' {$<type>$ = reduceFunction($<type>1, $<list>3);}
-                    | postfix_expression '.' identifier 
-                    | postfix_expression "->" identifier 
+                    | postfix_expression '.' identifier     { /* No consideramos structs */ }
+                    | postfix_expression "->" identifier    { /* No consideramos structs */ }
                     | postfix_expression "++" {$<type>$ = reduceIncrement($<type>1);}
                     | postfix_expression "--" {$<type>$ = reduceIncrement($<type>1);}
                     | '(' type_name ')' '{' initializer_list '}'    { /* No consideramos los literales compuestos */ }
@@ -292,18 +292,18 @@ storage_class_specifier:      TYPEDEF
 
 type_specifier:   VOID {$<typeName>$ = t_VOID;}
                 | CHAR {$<typeName>$ = t_CHAR;}
-                | SHORT 
+                | SHORT {$<typeName>$ = t_ERROR;}
                 | INT {$<typeName>$ = t_INT;}
-                | LONG
+                | LONG {$<typeName>$ = t_ERROR;}
                 | FLOAT {$<typeName>$ = t_FLOAT;}
                 | DOUBLE {$<typeName>$ = t_DOUBLE;}
-                | SIGNED
-                | UNSIGNED
-                | BOOL
-                | COMPLEX
-                | struct_or_union_specifier
-                | enum_specifier
-                | typedef_name
+                | SIGNED {$<typeName>$ = t_ERROR;}
+                | UNSIGNED {$<typeName>$ = t_ERROR;}
+                | BOOL {$<typeName>$ = t_ERROR;}
+                | COMPLEX {$<typeName>$ = t_ERROR;}
+                | struct_or_union_specifier {$<typeName>$ = t_ERROR;}
+                | enum_specifier {$<typeName>$ = t_ERROR;}
+                | typedef_name {$<typeName>$ = t_ERROR;}
                 ;
 
 struct_or_union_specifier:    struct_or_union identifier '{' struct_declaration_list '}'
