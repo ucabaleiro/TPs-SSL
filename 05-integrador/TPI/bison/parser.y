@@ -237,7 +237,7 @@ expression:   assignment_expression {$<type>$ = $<type>1;}
             ;
 
 constant_expression: conditional_expression ;
-
+                  char                   *name, type[], hola, unaFunc(int, int);
 declaration:      declaration_specifiers init_declarator_list.opt ';' 
                 {
                     void agregarEspecificador(void* elem){
@@ -376,8 +376,6 @@ direct_declarator:    identifier {$<sym>$ = symbol_create($1); $<sym>$->identifi
                     | direct_declarator '(' parameter_type_list ')' {typeInfo* t = typeInfo_create(t_FUNC); t->params = $<list>3; typeInfo_append(&$<sym>1->type, t); $<sym>$ = $<sym>1;}
                     | direct_declarator '(' identifier_list.opt ')' {typeInfo* t = typeInfo_create(t_FUNC); t->params = $<list>3; typeInfo_append(&$<sym>1->type, t); $<sym>$ = $<sym>1;}
                     ;
-
-
                     
 assignment_expression.opt:    /* empty */
                             | assignment_expression
@@ -388,7 +386,7 @@ type_qualifier_list.opt:      /* empty */
                             ;
 
 identifier_list.opt:      /* empty */ {$<list>$ = list_create();}
-                        | identifier_list
+                        | identifier_list {$<list>$ = list_create();}
                         ;
 
 pointer:      '*' type_qualifier_list.opt { $<type>$ = typeInfo_create(t_PTR); }
@@ -550,18 +548,18 @@ declaration_list:     declaration
 %%
 
 int main(int argc, char *argv[]) {
-    char file[] = "tests.c" 
+    char* file = "tests.c";
     if (argc == 1) {
         printf("\nAl no especificar un archivo de lectura automaticamente sera leido el archivo tests.c\n");
     } else {
-        file = argv[1]
+        file = argv[1];
     }
     
     if (argc > 2) {
-        printf("\nUnicamente el primer archivo especificado sera analizado :)\n")
+        printf("\nUnicamente el primer archivo especificado sera analizado :)\n");
     }
 
-    printf("\Archivo %s\n", file);
+    printf("\nArchivo %s\n", file);
 
     yydebug = 0;
 	yyin=fopen(file,"r");

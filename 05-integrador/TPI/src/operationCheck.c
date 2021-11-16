@@ -53,7 +53,7 @@ typeInfo* reduceArray(typeInfo* left, typeInfo* right){
     if(checkTypeError(left) || checkTypeError(right)) return typeError;
 
     if(left->type == t_ARRAY || left->type == t_PTR) {
-        if(right->type == t_INT) {
+        if(isInteger(right)) {
             return left->next;
         }
         else {
@@ -207,7 +207,7 @@ typeInfo* reduceEquality(typeInfo* left, typeInfo* right){
     if(areCompatiblePointers(left, right)) return typeInt;
     if(left->type == t_PTR && right->type == t_PTR && right->next->type == t_VOID) return left;
     if(left->type == t_PTR && left->next->type == t_VOID && right->type == t_PTR) return right;
-    printError("Los operandos de una inecuacion (==, !=) deben ser tanto ambos de tipo aritmeticom, ambos de tipo puntero a tipos compatibles, o uno de ellos puntero a void.");
+    printError("Los operandos de una inecuacion (==, !=) deben ser tanto ambos de tipo aritmetico, ambos de tipo puntero a tipos compatibles, o uno de ellos puntero a void.");
     return typeError;
 }
 
@@ -250,3 +250,4 @@ typeInfo* reduceAssignment(typeInfo* left, typeInfo* right){
     printError("Los operandos de una asignacion (=) deben ser tanto ambos de tipo aritmetico, ambos de tipo puntero a tipos compatibles, o uno de ellos puntero a void.");
     return typeError;
 }
+

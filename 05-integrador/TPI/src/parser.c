@@ -2192,6 +2192,20 @@ yyreduce:
     {(yyval.type) = reduceFunction((yyvsp[(1) - (4)].type), (yyvsp[(3) - (4)].list));;}
     break;
 
+  case 15:
+
+/* Line 1455 of yacc.c  */
+#line 135 "bison/parser.y"
+    { /* No consideramos structs */ ;}
+    break;
+
+  case 16:
+
+/* Line 1455 of yacc.c  */
+#line 136 "bison/parser.y"
+    { /* No consideramos structs */ ;}
+    break;
+
   case 17:
 
 /* Line 1455 of yacc.c  */
@@ -2776,11 +2790,25 @@ yyreduce:
     {(yyval.typeName) = t_CHAR;;}
     break;
 
+  case 104:
+
+/* Line 1455 of yacc.c  */
+#line 295 "bison/parser.y"
+    {(yyval.typeName) = t_ERROR;;}
+    break;
+
   case 105:
 
 /* Line 1455 of yacc.c  */
 #line 296 "bison/parser.y"
     {(yyval.typeName) = t_INT;;}
+    break;
+
+  case 106:
+
+/* Line 1455 of yacc.c  */
+#line 297 "bison/parser.y"
+    {(yyval.typeName) = t_ERROR;;}
     break;
 
   case 107:
@@ -2795,6 +2823,55 @@ yyreduce:
 /* Line 1455 of yacc.c  */
 #line 299 "bison/parser.y"
     {(yyval.typeName) = t_DOUBLE;;}
+    break;
+
+  case 109:
+
+/* Line 1455 of yacc.c  */
+#line 300 "bison/parser.y"
+    {(yyval.typeName) = t_ERROR;;}
+    break;
+
+  case 110:
+
+/* Line 1455 of yacc.c  */
+#line 301 "bison/parser.y"
+    {(yyval.typeName) = t_ERROR;;}
+    break;
+
+  case 111:
+
+/* Line 1455 of yacc.c  */
+#line 302 "bison/parser.y"
+    {(yyval.typeName) = t_ERROR;;}
+    break;
+
+  case 112:
+
+/* Line 1455 of yacc.c  */
+#line 303 "bison/parser.y"
+    {(yyval.typeName) = t_ERROR;;}
+    break;
+
+  case 113:
+
+/* Line 1455 of yacc.c  */
+#line 304 "bison/parser.y"
+    {(yyval.typeName) = t_ERROR;;}
+    break;
+
+  case 114:
+
+/* Line 1455 of yacc.c  */
+#line 305 "bison/parser.y"
+    {(yyval.typeName) = t_ERROR;;}
+    break;
+
+  case 115:
+
+/* Line 1455 of yacc.c  */
+#line 306 "bison/parser.y"
+    {(yyval.typeName) = t_ERROR;;}
     break;
 
   case 124:
@@ -3125,7 +3202,7 @@ yyreduce:
 
 
 /* Line 1455 of yacc.c  */
-#line 3129 "src/parser.c"
+#line 3206 "src/parser.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -3341,8 +3418,21 @@ yyreturn:
 
 
 int main(int argc, char *argv[]) {
+    char* file = "tests.c";
+    if (argc == 1) {
+        printf("\nAl no especificar un archivo de lectura automaticamente sera leido el archivo tests.c\n");
+    } else {
+        file = argv[1];
+    }
+    
+    if (argc > 2) {
+        printf("\nUnicamente el primer archivo especificado sera analizado :)\n");
+    }
+
+    printf("\nArchivo %s\n", file);
+
     yydebug = 0;
-	yyin=fopen(argv[1],"r");
+	yyin=fopen(file,"r");
 
     initBaseTypes();
     st = symtable_create();
@@ -3358,6 +3448,6 @@ int main(int argc, char *argv[]) {
 }
 
 int yyerror(const char *msg) {
-	printf("\nLinea %d: %s\n",yylineno,msg);
+	printf("\nLinea %d: %s\n", yylineno, msg);
 	return 0; 
 }

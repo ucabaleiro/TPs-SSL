@@ -207,7 +207,7 @@ void symbol_print(symbol *self){
     printf("\n");
 }
 
-static char* typePrints[] = {"void", "char", "int", "float", "double", "puntero a ", "array de ", "funcion "};
+static char* typePrints[] = {"void", "char", "int", "float", "double", "puntero a ", "array de ", "funcion ", "tipo no reconocido"};
 
 void typeInfo_print(typeInfo *self){
     if(self == NULL){

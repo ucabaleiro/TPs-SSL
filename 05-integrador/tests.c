@@ -14,7 +14,7 @@ int main(){
     falsoArray[10]; //Error semantico, debe ser tipo array
 
     int array[10];
-    array["1"]; // Correcto, no hay log (por conversion a entero)
+    array['1']; // Correcto, no hay log, los char son de categoria entero
     array["A"]; //Error semantico, indice debe ser entero
     array[2]; // Correcto, no hay log
 
