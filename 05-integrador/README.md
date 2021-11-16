@@ -14,8 +14,10 @@ Por otro lado, a nivel **`semántico`** ciertos elementos del lenguaje fueron ig
     1. **Especificadores de declaración:** Solamente se consideran los tipos de dato base char, int, float, double, y void. Cualquier otro especificador de declaración (cualificadores, especificadores de almacenamiento, etc.) eleva un error silencioso que es practicamente ignorado.
     2. **Structs, Unions, Enums y Typedefs:** Justamente por lo mencionado en el item anterior, no consideramos a estos tipos de dato, y por consecuencia todas las reglas en la gramática relacionadas a sus construcciones están semánticamente vacías.
     3. **Arrays:** Consideramos a los arrays, pero no controlamos de ningun modo su tamaño.
-    4. **Funciones:** No consideramos los parámetros de las funciones declaradas o definidas con el [estilo K&R](https://jameshfisher.com/2016/11/27/c-k-and-r/), ya obsoleto.
-2. **Sobre expresiones:**
+    4. **Funciones:** No consideramos los parámetros de las funciones declaradas o definidas con el [estilo K&R](https://jameshfisher.com/2016/11/27/c-k-and-r/). Tampoco consideramos la semantica de las funciones variadicas, se ignora el "...".
+2. **Sobre las declaraciones:** No realizamos chequeos semanticos en las inicializaciones al declarar. Ya lo hacemos con las expresiones de asignación que cumplen prácticamente la misma función.
+3. **Sobre las definiciones de funciones:** No realizamos controles de tipos entre el retorno de la funcion y el valor realmente retornado por el 'return'. 
+4. **Sobre expresiones:**
     1. **lvalues:** Ya que las validaciones de expresiones se realizan puramente sobre "tipos de datos" no entienden la noción de lvalue. aquellas que sean sobre si algo es efectivamente un lvalue, o un lvalue modificable son ignoradas.
     2. **Operador &:** Ignoramos la validacion semantica del operador de dirección porque era necesario llevar registro de más información sobre la expresión. De haber implementado las validaciones de expresiones con un AST podríamos haberlo realizado.
     3. **Operadores . y ->:** Como no tratamos con tipos de dato struct o union, tampoco validamos semanticamente estos operadores de acceso.
