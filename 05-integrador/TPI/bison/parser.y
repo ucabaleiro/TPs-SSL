@@ -367,7 +367,7 @@ declarator:   pointer direct_declarator {typeInfo_append(&$<sym>2->type, $<type>
             | direct_declarator {$<sym>$ = $<sym>1;}
             ;
 
-direct_declarator:    identifier {$<sym>$ = symbol_create($1); $<sym>$->identifier = string_duplicate($1);}
+direct_declarator:    identifier {$<sym>$ = symbol_create(); $<sym>$->identifier = string_duplicate($1);}
                     | '(' declarator ')' { $<sym>$ = $<sym>2; }
                     | direct_declarator '[' type_qualifier_list.opt assignment_expression.opt ']'       {typeInfo* t = typeInfo_create(t_ARRAY); typeInfo_append(&$<sym>1->type, t); $<sym>$ = $<sym>1;}
                     | direct_declarator '[' STATIC type_qualifier_list.opt assignment_expression ']'    {typeInfo* t = typeInfo_create(t_ARRAY); typeInfo_append(&$<sym>1->type, t); $<sym>$ = $<sym>1;}
