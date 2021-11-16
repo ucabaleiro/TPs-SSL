@@ -237,7 +237,7 @@ expression:   assignment_expression {$<type>$ = $<type>1;}
             ;
 
 constant_expression: conditional_expression ;
-                  char                   *name, type[], hola, unaFunc(int, int);
+
 declaration:      declaration_specifiers init_declarator_list.opt ';' 
                 {
                     void agregarEspecificador(void* elem){

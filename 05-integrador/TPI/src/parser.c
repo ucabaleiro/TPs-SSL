@@ -617,16 +617,16 @@ static const yytype_uint16 yyrline[] =
      314,   316,   317,   320,   322,   323,   326,   327,   330,   331,
      334,   335,   338,   339,   342,   343,   344,   347,   348,   351,
      352,   355,   356,   359,   360,   361,   364,   366,   367,   370,
-     371,   372,   373,   374,   375,   376,   377,   382,   383,   386,
-     387,   390,   391,   394,   395,   398,   399,   402,   403,   406,
-     407,   410,   411,   414,   415,   418,   419,   422,   423,   426,
-     427,   428,   431,   432,   433,   434,   435,   436,   437,   438,
-     439,   442,   444,   445,   446,   449,   450,   453,   454,   457,
-     459,   460,   463,   464,   467,   468,   469,   470,   471,   472,
-     473,   476,   477,   478,   481,   483,   484,   487,   488,   491,
-     492,   495,   497,   498,   501,   502,   505,   506,   509,   510,
-     511,   514,   515,   518,   519,   520,   521,   524,   525,   528,
-     529,   533,   532,   537,   538,   539,   542,   543,   546,   547
+     371,   372,   373,   374,   375,   376,   377,   380,   381,   384,
+     385,   388,   389,   392,   393,   396,   397,   400,   401,   404,
+     405,   408,   409,   412,   413,   416,   417,   420,   421,   424,
+     425,   426,   429,   430,   431,   432,   433,   434,   435,   436,
+     437,   440,   442,   443,   444,   447,   448,   451,   452,   455,
+     457,   458,   461,   462,   465,   466,   467,   468,   469,   470,
+     471,   474,   475,   476,   479,   481,   482,   485,   486,   489,
+     490,   493,   495,   496,   499,   500,   503,   504,   507,   508,
+     509,   512,   513,   516,   517,   518,   519,   522,   523,   526,
+     527,   531,   530,   535,   536,   537,   540,   541,   544,   545
 };
 #endif
 
@@ -2989,189 +2989,196 @@ yyreduce:
   case 161:
 
 /* Line 1455 of yacc.c  */
-#line 390 "bison/parser.y"
+#line 388 "bison/parser.y"
+    {(yyval.list) = list_create();;}
+    break;
+
+  case 162:
+
+/* Line 1455 of yacc.c  */
+#line 389 "bison/parser.y"
     {(yyval.list) = list_create();;}
     break;
 
   case 163:
 
 /* Line 1455 of yacc.c  */
-#line 394 "bison/parser.y"
+#line 392 "bison/parser.y"
     { (yyval.type) = typeInfo_create(t_PTR); ;}
     break;
 
   case 164:
 
 /* Line 1455 of yacc.c  */
-#line 395 "bison/parser.y"
+#line 393 "bison/parser.y"
     {typeInfo* t = typeInfo_create(t_PTR); typeInfo_append(&(yyvsp[(3) - (3)].type), t); (yyval.type) = (yyvsp[(3) - (3)].type);;}
     break;
 
   case 167:
 
 /* Line 1455 of yacc.c  */
-#line 402 "bison/parser.y"
+#line 400 "bison/parser.y"
     {(yyval.list) = (yyvsp[(1) - (1)].list);;}
     break;
 
   case 168:
 
 /* Line 1455 of yacc.c  */
-#line 403 "bison/parser.y"
+#line 401 "bison/parser.y"
     {(yyval.list) = (yyvsp[(1) - (3)].list); /* TODO: Por ahora ignoramos los argumentos variadicos */ ;}
     break;
 
   case 169:
 
 /* Line 1455 of yacc.c  */
-#line 406 "bison/parser.y"
+#line 404 "bison/parser.y"
     {(yyval.list) = list_create(); list_add((yyval.list), (yyvsp[(1) - (1)].sym));;}
     break;
 
   case 170:
 
 /* Line 1455 of yacc.c  */
-#line 407 "bison/parser.y"
+#line 405 "bison/parser.y"
     {(yyval.list) = (yyvsp[(1) - (3)].list); list_add((yyval.list), (yyvsp[(3) - (3)].sym));;}
     break;
 
   case 171:
 
 /* Line 1455 of yacc.c  */
-#line 410 "bison/parser.y"
+#line 408 "bison/parser.y"
     { (yyval.sym) = (yyvsp[(2) - (2)].sym); typeInfo_append(&(yyval.sym)->type, (yyvsp[(1) - (2)].type)); ;}
     break;
 
   case 172:
 
 /* Line 1455 of yacc.c  */
-#line 411 "bison/parser.y"
+#line 409 "bison/parser.y"
     { (yyval.sym) = (yyvsp[(2) - (2)].sym); typeInfo_append(&(yyval.sym)->type, (yyvsp[(1) - (2)].type)); ;}
     break;
 
   case 173:
 
 /* Line 1455 of yacc.c  */
-#line 414 "bison/parser.y"
+#line 412 "bison/parser.y"
     { (yyval.sym) = symbol_create(); ;}
     break;
 
   case 174:
 
 /* Line 1455 of yacc.c  */
-#line 415 "bison/parser.y"
+#line 413 "bison/parser.y"
     { (yyval.sym) = symbol_create(); (yyval.sym)->type = (yyvsp[(1) - (1)].type); ;}
     break;
 
   case 177:
 
 /* Line 1455 of yacc.c  */
-#line 422 "bison/parser.y"
+#line 420 "bison/parser.y"
     {(yyval.type) = (yyvsp[(1) - (1)].type);;}
     break;
 
   case 178:
 
 /* Line 1455 of yacc.c  */
-#line 423 "bison/parser.y"
+#line 421 "bison/parser.y"
     {typeInfo_append(&(yyvsp[(2) - (2)].type), (yyvsp[(1) - (2)].type)); (yyval.type) = (yyvsp[(2) - (2)].type);;}
     break;
 
   case 179:
 
 /* Line 1455 of yacc.c  */
-#line 426 "bison/parser.y"
+#line 424 "bison/parser.y"
     { (yyval.type) = (yyvsp[(1) - (1)].type); ;}
     break;
 
   case 180:
 
 /* Line 1455 of yacc.c  */
-#line 427 "bison/parser.y"
+#line 425 "bison/parser.y"
     { (yyval.type) = (yyvsp[(2) - (2)].type); typeInfo_append(&(yyval.type), (yyvsp[(1) - (2)].type)); ;}
     break;
 
   case 181:
 
 /* Line 1455 of yacc.c  */
-#line 428 "bison/parser.y"
+#line 426 "bison/parser.y"
     { (yyval.type) = (yyvsp[(1) - (1)].type); ;}
     break;
 
   case 182:
 
 /* Line 1455 of yacc.c  */
-#line 431 "bison/parser.y"
+#line 429 "bison/parser.y"
     { (yyval.type) = (yyvsp[(2) - (3)].type); ;}
     break;
 
   case 183:
 
 /* Line 1455 of yacc.c  */
-#line 432 "bison/parser.y"
+#line 430 "bison/parser.y"
     { (yyval.type) = typeInfo_create(t_ARRAY); ;}
     break;
 
   case 184:
 
 /* Line 1455 of yacc.c  */
-#line 433 "bison/parser.y"
+#line 431 "bison/parser.y"
     { (yyval.type) = typeInfo_create(t_ARRAY); ;}
     break;
 
   case 185:
 
 /* Line 1455 of yacc.c  */
-#line 434 "bison/parser.y"
+#line 432 "bison/parser.y"
     { (yyval.type) = typeInfo_create(t_FUNC); (yyval.type)->params = (yyvsp[(2) - (3)].list); ;}
     break;
 
   case 186:
 
 /* Line 1455 of yacc.c  */
-#line 435 "bison/parser.y"
+#line 433 "bison/parser.y"
     { (yyval.type) = typeInfo_create(t_FUNC); (yyval.type)->params = list_create(); ;}
     break;
 
   case 187:
 
 /* Line 1455 of yacc.c  */
-#line 436 "bison/parser.y"
+#line 434 "bison/parser.y"
     { (yyval.type) = (yyvsp[(1) - (4)].type); typeInfo* t = typeInfo_create(t_ARRAY); typeInfo_append(&(yyval.type), t); ;}
     break;
 
   case 188:
 
 /* Line 1455 of yacc.c  */
-#line 437 "bison/parser.y"
+#line 435 "bison/parser.y"
     { (yyval.type) = (yyvsp[(1) - (4)].type); typeInfo* t = typeInfo_create(t_ARRAY); typeInfo_append(&(yyval.type), t); ;}
     break;
 
   case 189:
 
 /* Line 1455 of yacc.c  */
-#line 438 "bison/parser.y"
+#line 436 "bison/parser.y"
     { (yyval.type) = (yyvsp[(1) - (4)].type); typeInfo* t = typeInfo_create(t_FUNC); t->params = (yyvsp[(3) - (4)].list); typeInfo_append(&(yyval.type), t); ;}
     break;
 
   case 190:
 
 /* Line 1455 of yacc.c  */
-#line 439 "bison/parser.y"
+#line 437 "bison/parser.y"
     { (yyval.type) = (yyvsp[(1) - (3)].type); typeInfo* t = typeInfo_create(t_FUNC); t->params = list_create(); typeInfo_append(&(yyval.type), t); ;}
     break;
 
   case 210:
 
 /* Line 1455 of yacc.c  */
-#line 473 "bison/parser.y"
+#line 471 "bison/parser.y"
     { yyerrok; ;}
     break;
 
   case 241:
 
 /* Line 1455 of yacc.c  */
-#line 533 "bison/parser.y"
+#line 531 "bison/parser.y"
     {
                             typeInfo_append(&(yyvsp[(2) - (3)].sym)->type, (yyvsp[(1) - (3)].type));
                             symtable_functionDefinition(st, (yyvsp[(2) - (3)].sym));
@@ -3181,28 +3188,28 @@ yyreduce:
   case 243:
 
 /* Line 1455 of yacc.c  */
-#line 537 "bison/parser.y"
+#line 535 "bison/parser.y"
     { yyerrok; ;}
     break;
 
   case 244:
 
 /* Line 1455 of yacc.c  */
-#line 538 "bison/parser.y"
+#line 536 "bison/parser.y"
     { yyerrok; ;}
     break;
 
   case 245:
 
 /* Line 1455 of yacc.c  */
-#line 539 "bison/parser.y"
+#line 537 "bison/parser.y"
     { yyerrok; ;}
     break;
 
 
 
 /* Line 1455 of yacc.c  */
-#line 3206 "src/parser.c"
+#line 3213 "src/parser.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -3414,7 +3421,7 @@ yyreturn:
 
 
 /* Line 1675 of yacc.c  */
-#line 550 "bison/parser.y"
+#line 548 "bison/parser.y"
 
 
 int main(int argc, char *argv[]) {

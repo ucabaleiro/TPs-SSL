@@ -223,7 +223,7 @@ void typeInfo_print(typeInfo *self){
             printf("sin parametros, ");
         }
         else{
-            printf("con parametros de tipo: ");
+            printf("con %i parametros de tipo: ", list_size(self->params));
             list_iterate(self->params, _parameterPrint);
         }
         printf("y retorno de tipo: ");
