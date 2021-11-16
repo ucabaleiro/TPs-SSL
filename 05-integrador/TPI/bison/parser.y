@@ -550,8 +550,21 @@ declaration_list:     declaration
 %%
 
 int main(int argc, char *argv[]) {
+    char file[] = "tests.c" 
+    if (argc == 1) {
+        printf("\nAl no especificar un archivo de lectura automaticamente sera leido el archivo tests.c\n");
+    } else {
+        file = argv[1]
+    }
+    
+    if (argc > 2) {
+        printf("\nUnicamente el primer archivo especificado sera analizado :)\n")
+    }
+
+    printf("\Archivo %s\n", file);
+
     yydebug = 0;
-	yyin=fopen(argv[1],"r");
+	yyin=fopen(file,"r");
 
     initBaseTypes();
     st = symtable_create();
@@ -567,6 +580,6 @@ int main(int argc, char *argv[]) {
 }
 
 int yyerror(const char *msg) {
-	printf("\nLinea %d: %s\n",yylineno,msg);
+	printf("\nLinea %d: %s\n", yylineno, msg);
 	return 0; 
 }

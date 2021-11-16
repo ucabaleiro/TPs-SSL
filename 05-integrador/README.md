@@ -22,7 +22,7 @@ Por otro lado, a nivel **`semántico`** ciertos elementos del lenguaje fueron ig
 
 # Como funciona el ejecutable
 Para funcionar, el TPI necesita un archivo de entrada, que debe ser pasado como argumento al ejecutar el programa desde una terminal.
-Se lo puede probar con el archivo de prueba.
+Se lo puede probar sin pasar ningun parametro con el [`archivo default de prueba`](https://github.com/utn-frba-ssl/21-002-01/blob/main/05-integrador/tests.c).
 
 # Modulos y bibliotecas usadas
 En cuanto a **contenido externo**, optamos por hacer uso de dos modulos de las commons de sistemas operativos, los cuales redujimos a una biblioteca estatica.
@@ -37,7 +37,7 @@ Por otro lado, desarrollamos los siguientes modulos para delegar algunas respons
 Un vistazo al directorio del TP.
 ```
 .
-├── archivoDePrueba.c
+├── tests.c
 ├── TPI.exe
 └── TPI
     ├── so-commons-library
@@ -50,13 +50,13 @@ Un vistazo al directorio del TP.
     ├── src
     └── makefile
 ```
-* **`archivoDePrueba.c`**: Codigo C para probar sobre el ejecutable del TP.
+* [**`tests.c`**](https://github.com/utn-frba-ssl/21-002-01/blob/main/05-integrador/tests.c): Codigo C para probar sobre el ejecutable del TP.
 * **`TPI.exe`**: El ejecutable final del TP.
 * **`/TPI`**
     * **`/so-commons-library`**: Directorio que contiene la biblioteca estática y headers de las commons.
     * **`/include`**: Directorio con el header `*.h` generado por bison, y los encabezados de nuestros modulos.
-    * **`/lex`**: Directorio con el archivo de flex `lexer.l` desarrollado.
-    * **`/bison`**: Directorio con el archivo de bison `parser.y` desarrollado.
+    * **`/lex`**: Directorio con el archivo de flex [`lexer.l`](https://github.com/utn-frba-ssl/21-002-01/blob/main/05-integrador/TPI/lex/lexer.l) desarrollado.
+    * **`/bison`**: Directorio con el archivo de bison [`parser.y`](https://github.com/utn-frba-ssl/21-002-01/blob/main/05-integrador/TPI/bison/parser.y) desarrollado.
     * **`/obj`**: Directorio con los archivos objeto `*.o` usados en la compilacion del ejecutable final.
     * **`/src`**: Directorio con todo el codigo fuente `*.c` generado por bison y flex, y de nuestros propios modulos.
-    * **`makefile`**: Para la compilacion del TP.
+    * [**`makefile`**](https://github.com/utn-frba-ssl/21-002-01/blob/main/05-integrador/TPI/makefile): Para la compilacion del TP.
