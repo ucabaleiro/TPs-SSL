@@ -34,6 +34,8 @@ int main(){
     punterosAFuncion[1](errorPunteroAFuncion, charArray); //Error semantico, parametro 1 es puntero a funcion incorrecto
     punterosAFuncion[1](punteroAFuncion, charArray); // Correcto, no hay log
 
+    int @hola = 38;
+
     return 0;
 }
 
