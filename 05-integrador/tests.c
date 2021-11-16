@@ -110,9 +110,12 @@ float retornar_float()
     return char_z;
 }
 
-int error_restar(int, int resto) //Error semantico, todos los parametros deben estar identificados en la definicion
-{
+int error_restar(int, int resto) { //Error semantico, todos los parametros deben estar identificados en la definicion
     return valor - resto; //Error semantico, valor no fue declarado
+}
+
+int error_restar(int efe, int resto) { //Error semantico, doble definicion de misma funcion
+
 }
 
 int retorna_aritmetico() {
