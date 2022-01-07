@@ -1,2 +1,2 @@
-# 21-002-01
-Repositorio del Grupo nro 1 del curso K2002 Martes TM
+# TPs-SSL
+Repositorio con los trabajos practicos realizados por mi equipo y yo para la asignatura **SINTAXIS Y SEMÁNTICA DE LOS LENGUAJES** en la **UNIVERSIDAD TECNOLÓGICA NACIONAL FACULTAD REGIONAL BUENOS AIRES** durante el 2021.
